@@ -1,0 +1,2927 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AI 产品工作台</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚦</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --paper: #EEF1EE;
+  --panel: #FFFFFF;
+  --ink: #1E2A27;
+  --muted: #5E6D68;
+  --line: #CAD3CE;
+  --teal: #1F5C66;
+  --teal-soft: #DCE8E9;
+  --go: #2C8656;
+  --stop: #BF3A2F;
+  --caution: #B57B0C;
+  --caution-soft: #F6ECD6;
+  --font: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #131917; --panel: #1B2321; --ink: #E3EAE7; --muted: #94A39E; --line: #2F3B38;
+    --teal: #6FB3BD; --teal-soft: #1F3236; --go: #4FB27D; --stop: #E0695E; --caution: #E0A93C; --caution-soft: #3A3020;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #131917; --panel: #1B2321; --ink: #E3EAE7; --muted: #94A39E; --line: #2F3B38;
+  --teal: #6FB3BD; --teal-soft: #1F3236; --go: #4FB27D; --stop: #E0695E; --caution: #E0A93C; --caution-soft: #3A3020;
+}
+
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.6 var(--font); font-variant-numeric: tabular-nums; }
+h1, h2, h3, h4 { margin: 0; line-height: 1.3; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+.app { min-height: 100%; }
+
+/* ---------- 顶栏 ---------- */
+.topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 28px; padding-top: calc(10px + env(safe-area-inset-top, 0px)); background: var(--panel); border-bottom: 1px solid var(--line); }
+.brand { display: flex; gap: 8px; align-items: center; }
+.brand strong { font-size: 15px; white-space: nowrap; }
+.brand-mark { width: 12px; display: grid; gap: 2px; padding: 3px 2px; background: var(--ink); border-radius: 3px; }
+.brand-mark i { width: 8px; height: 8px; border-radius: 50%; background: #555; }
+.brand-mark i:nth-child(1) { background: var(--stop); }
+.brand-mark i:nth-child(3) { background: var(--go); }
+.switch select { width: auto; max-width: 340px; padding: 6px 9px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.mode { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.mode-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--caution); }
+.mode-dot.model { background: var(--go); }
+.topbar .link { font-size: 13px; }
+
+/* ---------- 通用 ---------- */
+.btn { border: 1px solid transparent; border-radius: 6px; padding: 7px 14px; cursor: pointer; background: none; font-weight: 500; }
+.btn.primary { background: var(--teal); color: #fff; }
+:root[data-theme="dark"] .btn.primary { color: #0F1716; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn.primary { color: #0F1716; } }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ghost { border-color: var(--line); background: var(--panel); }
+.btn.ghost:hover { border-color: var(--teal); }
+.btn.danger { color: var(--stop); }
+.btn.block { width: 100%; }
+.btn:disabled { opacity: .5; cursor: default; }
+.link { border: 0; background: none; color: var(--teal); padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; justify-self: start; }
+.icon { border: 0; background: none; width: 26px; height: 26px; border-radius: 4px; cursor: pointer; color: var(--muted); }
+.icon:hover:not(:disabled) { background: var(--paper); color: var(--ink); }
+.icon:disabled { opacity: .3; cursor: default; }
+.tag { font-size: 12px; padding: 1px 8px; border-radius: 10px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.tag.go { color: var(--go); border-color: currentColor; }
+.tag.caution { color: var(--caution); border-color: currentColor; }
+.hint { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+.notice { background: var(--caution-soft); border-left: 3px solid var(--caution); padding: 8px 12px; margin: 8px 0; font-size: 14px; border-radius: 0 4px 4px 0; }
+.fld { display: grid; gap: 4px; margin-bottom: 12px; }
+.fld > span { font-size: 13px; color: var(--muted); }
+input, select, textarea { border: 1px solid var(--line); background: var(--panel); border-radius: 5px; padding: 6px 9px; width: 100%; min-width: 0; }
+textarea { resize: vertical; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.grow { flex: 1; }
+
+/* ---------- 主区 ---------- */
+.main { padding: 24px 28px 48px; min-width: 0; }
+#header { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; }
+#header h1 { font-size: 26px; font-weight: 700; }
+.h-sub { margin: 4px 0 0; display: flex; gap: 12px; flex-wrap: wrap; color: var(--muted); font-size: 13px; align-items: center; }
+.h-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- 阶段轨道：信号灯 ---------- */
+#track { overflow-x: auto; margin: 0 -28px 24px; padding: 0 28px; }
+.rail { list-style: none; margin: 0; padding: 8px 0 4px; display: grid; grid-template-columns: repeat(10, minmax(92px, 1fr)); position: relative; }
+.station { position: relative; }
+.station::before { content: ""; position: absolute; top: 25px; left: 0; right: 0; height: 3px; background: var(--line); }
+.station:first-child::before { left: 50%; }
+.station:last-child::before { right: 50%; }
+.station.past::before, .station.current::before { background: var(--teal); }
+.station.current::before { right: 50%; }
+.station.current:last-child::before { right: 50%; }
+.station > button { position: relative; width: 100%; border: 0; background: none; cursor: pointer; display: grid; justify-items: center; gap: 2px; padding: 4px 4px 8px; border-radius: 8px; }
+.station > button:hover .st-name { color: var(--teal); }
+.station.viewing > button::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 28px; height: 3px; margin-left: -14px; border-radius: 2px; background: var(--teal); }
+.station.viewing .st-name { color: var(--teal); font-weight: 700; }
+.node { width: 22px; height: 22px; margin: 6px 0 4px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: var(--panel); border: 2px solid var(--line); color: var(--muted); }
+.station.past .node, .station.current .node { border-color: var(--teal); color: var(--teal); }
+.station.current .node { background: var(--teal); color: #fff; }
+/* 关键节点是一盏信号灯 */
+.station.key .node { width: 34px; height: 34px; margin: 0 0 0; font-size: 13px; border-width: 3px; background: var(--ink); color: #fff; border-color: var(--ink); }
+.station.key .node.idle { background: #5b6662; border-color: var(--ink); }
+.station.key .node.go { background: var(--go); border-color: var(--ink); box-shadow: 0 0 0 4px color-mix(in srgb, var(--go) 22%, transparent); }
+.station.key .node.stop { background: var(--stop); border-color: var(--ink); box-shadow: 0 0 0 4px color-mix(in srgb, var(--stop) 25%, transparent); animation: blink 1.6s ease-in-out 2; }
+.station.key .node.forced { background: var(--caution); border-color: var(--ink); box-shadow: 0 0 0 4px color-mix(in srgb, var(--caution) 25%, transparent); }
+@keyframes blink { 50% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--stop) 8%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .station.key .node.stop { animation: none; } }
+.st-name { font-size: 13px; text-align: center; line-height: 1.35; }
+.station.current .st-name { font-weight: 700; }
+.st-meta { font-size: 11px; color: var(--muted); }
+
+/* ---------- 工作区 ---------- */
+.work { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); gap: 24px; align-items: start; }
+.stage-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 20px 22px; }
+.sp-head { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.sp-head h2 { font-size: 20px; margin-right: 4px; }
+.sp-desc { color: var(--muted); margin: 6px 0 4px; max-width: 70ch; }
+.sec { font-size: 14px; color: var(--muted); font-weight: 500; margin: 20px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.steps { list-style: none; margin: 0; padding: 0; }
+.step { padding: 8px 0; border-bottom: 1px dashed var(--line); }
+.step-line { display: flex; align-items: center; gap: 10px; }
+.step-line select { width: 86px; flex: none; padding: 3px 6px; font-size: 13px; }
+.step-title { flex: 1; min-width: 0; }
+.step.done .step-title { color: var(--muted); }
+.step.done select { color: var(--go); }
+.step.doing select { color: var(--teal); font-weight: 500; }
+.step.skipped .step-title { text-decoration: line-through; color: var(--muted); }
+.step-tools { display: flex; gap: 0; opacity: .55; }
+.step:hover .step-tools, .step:focus-within .step-tools { opacity: 1; }
+.step-risk { margin: 4px 0 0 96px; font-size: 13px; color: var(--caution); }
+.step-peek { margin: 2px 0 0 96px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.step-more { margin: 8px 0 0 96px; }
+.empty { color: var(--muted); padding: 8px 0; }
+.addstep { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+.addstep .btn { white-space: nowrap; }
+.fields { max-width: 760px; }
+
+.metrics { display: grid; gap: 6px; }
+.m-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr .7fr 28px; gap: 6px; align-items: center; }
+.m-head { font-size: 12px; color: var(--muted); }
+.metrics > .btn { justify-self: start; margin-top: 4px; }
+.results { display: grid; gap: 6px; }
+.r-row { display: grid; grid-template-columns: 1fr 110px 64px; gap: 10px; align-items: center; }
+.r-row small { display: block; color: var(--muted); font-size: 12px; }
+.r-flag { font-size: 13px; color: var(--muted); }
+.r-flag.go { color: var(--go); } .r-flag.stop { color: var(--stop); }
+
+/* ---------- 决策台 ---------- */
+.desk { display: grid; gap: 16px; position: sticky; top: 72px; }
+.desk h3 { font-size: 15px; margin-bottom: 8px; }
+.desk h4 { font-size: 13px; color: var(--muted); font-weight: 500; margin: 14px 0 6px; }
+.desk h4 small { font-weight: 400; margin-left: 6px; }
+.next-text { font-size: 17px; font-weight: 500; margin: 0; }
+.next .btn { margin-top: 10px; }
+.session { border-color: var(--teal); }
+.session.gate { border-width: 2px; }
+.rules { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; font-size: 14px; }
+.rules li { display: grid; grid-template-columns: 18px 1fr; gap: 6px; }
+.rules small { display: block; color: var(--muted); font-size: 12px; }
+.rules .go .mark { color: var(--go); } .rules .stop .mark { color: var(--stop); font-weight: 700; }
+.verdict { margin: 10px 0 0; font-weight: 700; }
+.verdict.go { color: var(--go); } .verdict.stop { color: var(--stop); }
+.advice { font-weight: 500; margin: 0 0 6px; }
+.advice-reason { color: var(--muted); font-size: 14px; margin: 0; }
+.alt-title { font-size: 13px; margin: 10px 0 2px; }
+.alts { margin: 0; padding-left: 18px; font-size: 13px; color: var(--muted); }
+.decide { display: flex; flex-wrap: wrap; gap: 8px; }
+.loading { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .4; } }
+@media (prefers-reduced-motion: reduce) { .loading { animation: none; } }
+.loglist { list-style: none; margin: 0; padding: 0; max-height: 420px; overflow-y: auto; }
+.loglist li { padding: 8px 0 8px 12px; border-left: 2px solid var(--line); font-size: 13px; }
+.loglist li.log-force { border-left-color: var(--caution); }
+.loglist li.log-gate { border-left-color: var(--teal); }
+.loglist time { color: var(--muted); font-size: 12px; }
+.loglist p { margin: 2px 0 0; }
+.loglist b { margin-right: 6px; }
+.log-sub { color: var(--muted); }
+.log-reason { color: var(--caution); }
+
+/* ---------- 项目材料 ---------- */
+.count { display: inline-block; min-width: 20px; padding: 0 6px; margin-left: 4px; border-radius: 10px; background: var(--teal-soft); color: var(--teal); font-size: 12px; line-height: 20px; text-align: center; }
+.h-actions label.btn { display: inline-flex; align-items: center; }
+.mat-notice { display: flex; gap: 12px; align-items: baseline; justify-content: space-between; margin: -4px 0 16px; }
+.mat-notice .link { flex: none; font-size: 13px; }
+.matdlg { width: min(760px, 92vw); max-height: 86vh; overflow-y: auto; }
+dialog:has(.matdlg) { width: min(760px, 92vw); }
+.mat-group { font-size: 13px; color: var(--muted); font-weight: 500; margin: 14px 0 6px; }
+.mat-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.mat-items summary { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.mat-items summary:hover { border-color: var(--teal); }
+.mi-name { font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mat-items small { color: var(--muted); font-size: 12px; }
+.mat-items .doc { margin: 6px 0 4px; }
+
+/* ---------- 决策与依据 ---------- */
+.decide-bar { position: sticky; bottom: -16px; margin: 12px -16px -16px; padding: 12px 16px 14px; background: var(--panel); border-top: 1px solid var(--line); border-radius: 0 0 8px 8px; }
+.decide-title { margin: 0 0 6px; font-size: 13px; color: var(--muted); }
+.decide-bar .hint { margin-top: 8px; }
+.danger-link { color: var(--stop); margin-left: 8px; font-size: 13px; }
+.advice-more summary { cursor: pointer; font-size: 13px; color: var(--muted); margin: 4px 0; }
+.rules.stale, .results.stale { opacity: .5; }
+.status-card h3 { color: var(--muted); }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.btn-row .btn { flex: 1; }
+.snap-link { font-size: 12px; margin-top: 4px; }
+.snapdlg { width: min(760px, 92vw); max-height: 86vh; overflow-y: auto; }
+dialog:has(.snapdlg) { width: min(760px, 92vw); }
+.snap-head { font-size: 15px; margin: 0; }
+.snapdlg h4 { font-size: 13px; color: var(--muted); font-weight: 500; margin: 16px 0 6px; }
+.snapdlg h4 small { font-weight: 400; margin-left: 6px; }
+.snap-head b { margin-right: 6px; }
+.snap-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.snap-table th, .snap-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.snap-table th { color: var(--muted); font-weight: 500; font-size: 12px; }
+.snap-table td.go { color: var(--go); } .snap-table td.stop { color: var(--stop); }
+.evidence { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 4px 0 12px; font-size: 13px; }
+.evidence .k { color: var(--muted); margin-right: 4px; }
+.chip-sm { display: inline-flex; gap: 4px; align-items: center; padding: 2px 8px 2px 4px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.link-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: 50vh; overflow-y: auto; }
+.link-list label { display: flex; gap: 8px; align-items: center; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.link-list input { width: auto; }
+.link-list small { margin-left: auto; color: var(--muted); font-size: 12px; }
+.fld > span small.ver { margin-left: 8px; color: var(--muted); font-size: 12px; }
+.fld-num input { max-width: 180px; }
+.warn { color: var(--caution) !important; }
+.import-link { font-size: 13px; cursor: pointer; }
+
+.warn-card { border-color: var(--caution); background: var(--caution-soft); }
+.warn-card h3 { color: var(--caution); }
+.warn-card .btn-row .btn { flex: none; }
+details.more summary { cursor: pointer; color: var(--teal); font-size: 12px; margin-top: 4px; }
+details.more .doc { margin-top: 6px; font-size: 13px; }
+.snapdlg details.more p { margin: 6px 0; font-size: 13px; }
+
+.export-opts { display: grid; gap: 10px; margin-bottom: 8px; }
+.export-opt { display: grid; gap: 4px; text-align: left; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); cursor: pointer; }
+.export-opt:hover { border-color: var(--teal); background: var(--teal-soft); }
+.export-opt b { font-size: 15px; }
+.export-opt span { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+.log-approver { color: var(--teal); }
+.trend { margin-bottom: 4px; }
+.trend:empty { display: none; }
+.trend-title { margin: 0 0 8px; font-size: 13px; color: var(--muted); }
+.trend-title small { margin-left: 8px; font-size: 12px; }
+.tcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.tcard { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px 4px; background: var(--panel); }
+.tcard.stop { border-color: color-mix(in srgb, var(--stop) 45%, var(--line)); }
+.tcard.go { border-color: color-mix(in srgb, var(--go) 45%, var(--line)); }
+.tc-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 13px; }
+.tc-name { font-weight: 500; }
+.tc-name small { display: block; font-weight: 400; font-size: 11px; color: var(--muted); }
+.tc-val { display: flex; align-items: baseline; gap: 8px; margin-top: 2px; }
+.tc-val b { font-size: 22px; }
+.tcard.stop .tc-val b { color: var(--stop); }
+.tcard.go .tc-val b { color: var(--go); }
+.tc-val small { font-size: 12px; color: var(--muted); }
+.spark { width: 100%; height: auto; display: block; overflow: visible; }
+.spark .thr { stroke: var(--muted); stroke-dasharray: 4 4; stroke-width: 1; }
+.spark .thr-t { fill: var(--muted); font-size: 10px; }
+.spark .ln { fill: none; stroke: var(--teal); stroke-width: 2; }
+.spark circle { stroke: var(--panel); stroke-width: 2; }
+.spark circle.go { fill: var(--go); }
+.spark circle.stop { fill: var(--stop); }
+.spark circle.cur { stroke: var(--ink); stroke-dasharray: 2 2; }
+.spark .pv { fill: var(--ink); font-size: 11px; font-weight: 700; }
+.spark .px { fill: var(--muted); font-size: 10px; }
+
+/* ---------- 项目日志 ---------- */
+.card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.card-head h3 { margin: 0; }
+.card-head .link { font-size: 13px; }
+.logdlg { width: min(760px, 92vw); max-height: 86vh; display: flex; flex-direction: column; }
+dialog:has(.logdlg) { width: min(760px, 92vw); }
+.lognote { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 12px; }
+.lognote .btn { white-space: nowrap; }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.filter { border: 1px solid var(--line); background: var(--panel); border-radius: 14px; padding: 2px 12px; cursor: pointer; font-size: 13px; }
+.filter small { margin-left: 4px; color: var(--muted); }
+.filter.on { background: var(--teal); border-color: var(--teal); color: #fff; }
+.filter.on small { color: inherit; opacity: .8; }
+.timeline { list-style: none; margin: 0; padding: 4px 0 0; overflow-y: auto; }
+.timeline li { padding: 10px 0 10px 14px; border-left: 2px solid var(--line); font-size: 14px; }
+.timeline li.tl-gate, .timeline li.tl-next, .timeline li.tl-advance, .timeline li.tl-backflow, .timeline li.tl-create { border-left-color: var(--teal); }
+.timeline li.tl-force { border-left-color: var(--caution); }
+.timeline li.tl-note { border-left-color: var(--ink); }
+.timeline p { margin: 2px 0 0; }
+.timeline b { margin-right: 6px; }
+.tl-meta { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 12px; }
+
+/* ---------- 新建 ---------- */
+.create { max-width: 980px; padding-bottom: 24px; }
+.create h1 { font-size: 26px; }
+.lead { color: var(--muted); max-width: 66ch; }
+.file { display: inline-block; }
+.analysis { margin: 16px 0; }
+.an-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 10px; }
+.an-grid .k { display: block; font-size: 12px; color: var(--muted); }
+.an-grid b { font-size: 18px; }
+.analysis h4 { font-size: 13px; color: var(--muted); font-weight: 500; margin: 14px 0 6px; }
+.missing { margin: 4px 0 0; padding-left: 18px; color: var(--caution); }
+.decomp { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.dstage { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+.dstage.pre { opacity: .75; border-style: dashed; }
+.dstage h3 { font-size: 14px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+.dstage ul { list-style: none; margin: 0 0 6px; padding: 0; display: grid; gap: 4px; }
+.dstage li { display: flex; gap: 4px; }
+.dstage input { font-size: 13px; padding: 4px 7px; }
+.sticky { position: sticky; bottom: 0; background: var(--paper); padding: 14px 0; margin-top: 12px; border-top: 1px solid var(--line); }
+
+/* 多文件上传 */
+.drop { display: grid; gap: 2px; justify-items: center; text-align: center; padding: 22px 16px; border: 2px dashed var(--line); border-radius: 8px; background: var(--panel); cursor: pointer; }
+.drop:hover, .drop.over { border-color: var(--teal); background: var(--teal-soft); }
+.drop small { color: var(--muted); }
+.flist, .ftypes { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; }
+.flist li { display: grid; grid-template-columns: 1fr auto 26px; gap: 10px; align-items: center; padding: 6px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; font-size: 14px; }
+.flist li.bad { border-color: var(--stop); }
+.flist li.bad .fmeta { color: var(--stop); }
+.fname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fmeta { color: var(--muted); font-size: 12px; }
+.ftypes li { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; align-items: center; font-size: 14px; }
+.ftypes small { grid-column: 2; color: var(--muted); }
+.docf { border-top: 1px solid var(--line); padding: 8px 0; }
+.docf summary { cursor: pointer; font-weight: 500; }
+.docf .doc { margin-top: 8px; }
+
+/* ---------- 新建项目向导 ---------- */
+.wizard { max-width: 860px; margin: 0 auto; padding-bottom: 8px; }
+.wizard h1 { font-size: 26px; margin-top: 18px; }
+.wizard .lead { margin: 6px 0 18px; }
+.wsteps { list-style: none; margin: 4px 0 0; padding: 0; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+.wsteps li { display: flex; align-items: center; gap: 6px; }
+.wsteps li + li::before { content: ""; width: 36px; height: 2px; background: var(--line); margin-right: 4px; }
+.wsteps span { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; border: 2px solid var(--line); background: var(--panel); }
+.wsteps li.on { color: var(--ink); font-weight: 700; }
+.wsteps li.on span { border-color: var(--teal); background: var(--teal); color: #fff; }
+.wsteps li.done { color: var(--teal); }
+.wsteps li.done span { border-color: var(--teal); color: var(--teal); }
+.wcard { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 14px; }
+.drop.big { padding: 30px 16px; gap: 6px; border-radius: 10px; background: var(--paper); }
+.drop.big.busy { opacity: .7; }
+.drop-icon { width: 40px; height: 40px; fill: none; stroke: var(--teal); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.drop.big b { font-size: 16px; }
+.wfiles { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.wfiles li { display: grid; grid-template-columns: auto 1fr auto 26px; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; }
+.wfiles li.bad { border-color: var(--stop); }
+.wfiles li.bad .fmeta { color: var(--stop); }
+.ext { font-size: 11px; font-weight: 700; color: var(--teal); background: var(--teal-soft); border-radius: 4px; padding: 2px 6px; min-width: 40px; text-align: center; }
+.wextra summary { cursor: pointer; font-size: 14px; color: var(--teal); }
+.wextra summary small { color: var(--muted); margin-left: 6px; }
+.wextra textarea { margin-top: 8px; }
+.wname { display: grid; gap: 4px; }
+.wname > span { font-size: 13px; color: var(--muted); }
+.wname > span small { margin-left: 8px; color: var(--teal); }
+.wname.big input { font-size: 18px; font-weight: 700; padding: 8px 12px; }
+.wactions { display: flex; align-items: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.wgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.wgrid > * { display: grid; gap: 4px; align-content: start; }
+.wgrid span { font-size: 13px; color: var(--muted); }
+.wgrid b { font-size: 15px; line-height: 1.5; }
+.wreason { margin: 0; font-size: 14px; color: var(--muted); }
+.wreason small { display: block; margin-top: 4px; font-size: 12px; }
+.wfj summary { cursor: pointer; font-size: 13px; color: var(--teal); }
+.wfj .ftypes { margin-top: 8px; }
+.wmiss { border-left: 3px solid var(--caution); background: var(--caution-soft); border-radius: 0 6px 6px 0; padding: 10px 14px; font-size: 14px; }
+.wmiss ul { margin: 4px 0 0; padding-left: 18px; }
+.wsub { font-size: 18px; margin: 28px 0 12px; display: flex; align-items: baseline; gap: 10px; }
+.wsub small { font-size: 13px; font-weight: 400; color: var(--muted); }
+
+/* 拆解时间线 */
+.timeline-edit { display: grid; }
+.tstage { position: relative; display: grid; grid-template-columns: 34px 1fr; gap: 14px; padding-bottom: 18px; }
+.tstage::before { content: ""; position: absolute; left: 16px; top: 30px; bottom: 0; width: 2px; background: var(--line); }
+.timeline-edit > .tstage:last-child::before { display: none; }
+.tnode { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; background: var(--panel); border: 2px solid var(--line); color: var(--muted); position: relative; z-index: 1; }
+.tstage.key .tnode { background: var(--ink); border-color: var(--ink); color: #fff; }
+.tstage.current .tnode { background: var(--teal); border-color: var(--teal); color: #fff; box-shadow: 0 0 0 4px var(--teal-soft); }
+.tbody { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px 8px; }
+.tstage.current .tbody { border-color: var(--teal); }
+.tbody h3 { font-size: 15px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+.tsteps { list-style: none; margin: 0; padding: 0; }
+.tsteps li { display: flex; align-items: center; gap: 4px; }
+.tsteps li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--line); flex: none; margin-right: 4px; }
+.tstage.current .tsteps li::before { background: var(--teal); }
+input.inline { border-color: transparent; background: transparent; padding: 4px 8px; font-size: 14px; }
+input.inline:hover { border-color: var(--line); }
+input.inline:focus { border-color: var(--teal); background: var(--panel); }
+.tsteps .icon { opacity: 0; }
+.tsteps li:hover .icon, .tsteps li:focus-within .icon { opacity: 1; }
+@media (hover: none) { .tsteps .icon { opacity: 1; } }
+.link.add { font-size: 13px; text-decoration: none; margin: 2px 0 0 14px; }
+.link.add:hover { text-decoration: underline; }
+.pregroup { margin-bottom: 18px; position: relative; }
+.pregroup::before { content: ""; position: absolute; left: 16px; top: 30px; bottom: -18px; width: 2px; background: var(--line); }
+.pregroup > summary { list-style: none; display: grid; grid-template-columns: 34px 1fr; gap: 14px; align-items: center; cursor: pointer; }
+.pregroup > summary::-webkit-details-marker { display: none; }
+.pregroup > summary > span:last-child { background: var(--paper); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 14px; display: grid; gap: 2px; }
+.pregroup > summary small { color: var(--muted); font-size: 13px; }
+.pregroup > summary:hover > span:last-child { border-color: var(--teal); }
+.pregroup[open] > summary { margin-bottom: 18px; }
+.tnode.muted { width: 34px; font-size: 11px; background: var(--paper); border-style: dashed; }
+.pregroup .tstage .tbody { background: var(--paper); }
+.wfoot { position: sticky; bottom: 0; z-index: 3; display: flex; align-items: center; gap: 10px; margin: 8px -12px 0; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 -6px 18px rgba(20, 30, 28, .08); }
+.wfoot-info { font-size: 13px; color: var(--muted); }
+@media (max-width: 760px) { .wgrid { grid-template-columns: 1fr; } .wfiles li { grid-template-columns: auto 1fr 26px; } .wfiles .fmeta { display: none; } .wfoot { flex-wrap: wrap; } }
+
+/* ---------- 弹窗 ---------- */
+dialog { border: 1px solid var(--line); border-radius: 10px; padding: 0; background: var(--panel); color: var(--ink); width: min(480px, 92vw); }
+dialog::backdrop { background: rgba(20, 30, 28, .45); }
+.dlg { padding: 20px 22px; }
+.dlg.wide { width: min(720px, 92vw); }
+dialog:has(.wide) { width: min(720px, 92vw); }
+.dlg h3 { font-size: 17px; margin-bottom: 8px; }
+.dlg-desc { color: var(--muted); margin: 0 0 12px; font-size: 14px; }
+.dlg-err { color: var(--stop); font-size: 13px; min-height: 1em; margin: 0; }
+.dlg-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.doc { white-space: pre-wrap; font: inherit; background: var(--paper); padding: 12px; border-radius: 6px; max-height: 50vh; overflow: auto; }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--ink); color: var(--paper); padding: 8px 16px; border-radius: 6px; opacity: 0; pointer-events: none; transition: .2s; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- 桌面：一屏三栏（左侧竖向阶段 / 中间阶段内容 / 右侧决策台），不显示滚动条 ---------- */
+@media (min-width: 1081px) {
+  .work { grid-template-columns: 210px minmax(0, 1.5fr) minmax(300px, 1fr); gap: 20px; }
+  #track { margin: 0; padding: 0; overflow: visible; }
+  .rail { display: flex; flex-direction: column; padding: 0; }
+  .station::before { top: 0; bottom: 0; left: 16.5px; right: auto; width: 3px; height: auto; }
+  .station:first-child::before { left: 16.5px; top: 50%; }
+  .station:last-child::before { right: auto; bottom: 50%; }
+  .station.current::before { right: auto; bottom: 50%; }
+  .station.current:first-child::before { display: none; }
+  .station > button { grid-template-columns: 36px 1fr; justify-items: start; align-items: center; column-gap: 10px; row-gap: 0; padding: 7px 12px 7px 0; text-align: left; border-radius: 0; }
+  .station .node { grid-row: 1 / span 2; justify-self: center; margin: 0; }
+  .station.key .node { margin: 0; }
+  .st-name { text-align: left; font-size: 14px; }
+  .st-meta { font-size: 12px; }
+  .station.viewing > button::after { left: auto; right: 0; top: 18%; bottom: 18%; width: 3px; height: auto; margin: 0; }
+}
+@media (min-width: 1081px) and (min-height: 620px) {
+  html, body { height: 100%; overflow: hidden; }
+  .app { height: 100%; display: flex; flex-direction: column; }
+  .topbar { position: static; flex: none; }
+  .main { flex: 1; min-height: 0; overflow-y: auto; }
+  .main.shell { display: flex; flex-direction: column; overflow: hidden; padding-top: 16px; padding-bottom: 16px; }
+  .main.shell #header { flex: none; margin-bottom: 12px; }
+  .main.shell #header h1 { font-size: 22px; }
+  .main.shell #materials { flex: none; }
+  .main.shell .work { flex: 1; min-height: 0; grid-template-rows: 100%; }
+  .main.shell #track, .main.shell .stage-panel, .main.shell .desk { height: 100%; overflow-y: auto; scrollbar-width: none; }
+  .main.shell #track::-webkit-scrollbar, .main.shell .stage-panel::-webkit-scrollbar, .main.shell .desk::-webkit-scrollbar { display: none; }
+  .main.shell .rail { min-height: 100%; }
+  .main.shell .station { flex: 1 0 auto; display: flex; align-items: center; }
+  .main.shell .station > button { flex: 1; }
+  .main.shell .desk { position: static; align-content: start; }
+  .main.shell .stage-panel {
+    background:
+      linear-gradient(var(--panel) 30%, transparent) center top / 100% 40px no-repeat local,
+      linear-gradient(transparent, var(--panel) 70%) center bottom / 100% 40px no-repeat local,
+      radial-gradient(farthest-side at 50% 0, rgba(0,0,0,.10), transparent) center top / 100% 12px no-repeat scroll,
+      radial-gradient(farthest-side at 50% 100%, rgba(0,0,0,.10), transparent) center bottom / 100% 12px no-repeat scroll,
+      var(--panel);
+  }
+  .main.shell .loglist { max-height: none; overflow: visible; }
+  .main.shell .fields > :last-child { margin-bottom: 0; }
+}
+
+/* ---------- 窄屏 ---------- */
+@media (max-width: 1080px) {
+  .work { grid-template-columns: 1fr; }
+  .desk { position: static; }
+}
+@media (max-width: 760px) {
+  .topbar { padding-left: 16px; padding-right: 16px; }
+  .switch select { max-width: 200px; }
+  .mat-body { grid-template-columns: 1fr; }
+  .main { padding: 16px; }
+  #track { margin: 0 -16px 16px; padding: 0 16px; }
+  .an-grid { grid-template-columns: 1fr; }
+  .m-row { grid-template-columns: 1fr 1fr; }
+  .m-head { display: none; }
+  .step-more, .step-risk, .step-peek { margin-left: 0; }
+  .step-line { flex-wrap: wrap; }
+}
+
+</style>
+</head>
+<body>
+  <div class="app">
+    <header id="topbar" class="topbar"></header>
+    <main id="main" class="main"></main>
+  </div>
+  <dialog id="dialog"></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>window.STATIC_DEMO = true;</script>
+  <script>
+// 阶段骨架：AI 项目的默认流程（不是行业统一标准）。AI 只负责往每个阶段里填"该做什么"。
+(function (root) {
+  const STAGES = [
+    {
+      n: 1, name: '业务与风险定义', key: false,
+      desc: '说清要解决什么业务问题、哪些结果绝对不能接受、手里有多少预算。',
+      fields: [
+        { k: 'goal', label: '业务目标', type: 'textarea' },
+        { k: 'unacceptable', label: '不可接受的结果', type: 'textarea' },
+        { k: 'budget', label: '预算', type: 'text' }
+      ],
+      steps: ['梳理业务痛点与现状数据', '确定业务目标', '列出不可接受的结果', '确认预算与时间']
+    },
+    {
+      n: 2, name: '可行性评估', key: true, gate: '是否立项',
+      desc: '判断这件事适不适合用 AI 做，数据拿不拿得到，成本能不能接受。',
+      fields: [
+        { k: 'feasibility', label: '可行性结论', type: 'select', options: ['可行', '有条件可行', '不可行'] },
+        { k: 'cost', label: '成本估算', type: 'text' }
+      ],
+      steps: ['评估模型能力是否够用', '确认数据能否获取', '评估合规与隐私风险', '估算建设与运行成本', '给出可行性结论']
+    },
+    {
+      n: 3, name: '验收标准设计', key: true, gate: '标准确认',
+      desc: '先定"什么算做对"，再开始做。把目标翻译成带阈值的指标。',
+      fields: [
+        { k: 'metrics', label: '指标', type: 'metrics' },
+        { k: 'minGraySample', label: '灰度最少样本量（第 8 关会检查，样本不够就不能全量）', type: 'number' }
+      ],
+      steps: ['确定北极星指标及目标值', '定义离线评测指标及阈值', '定义护栏指标', '设定灰度最少样本量', '与业务方确认标准']
+    },
+    {
+      n: 4, name: '方案设计与 PRD 评审', key: true, gate: '评审通过',
+      desc: '设计方案、AI 能力边界和兜底方式，写成 PRD 并组织评审。',
+      fields: [
+        { k: 'prd', label: 'PRD 摘要或全文', type: 'textarea' },
+        { k: 'review', label: '评审结论', type: 'select', options: ['通过', '有条件通过', '不通过'] },
+        { k: 'issues', label: '遗留问题（每行一条，格式：问题｜处理方式）', type: 'textarea' }
+      ],
+      steps: ['设计方案与 AI 能力边界', '设计降级与兜底方案', '撰写 PRD', '组织 PRD 评审']
+    },
+    {
+      n: 5, name: '评测集构建', key: false, parallelWith: 6,
+      desc: '准备用来检验效果的样本和评分规则。可以和构建调试同时进行。',
+      fields: [
+        { k: 'evalset', label: '评测集说明（来源、标注方式、评分方式）', type: 'textarea' },
+        { k: 'evalSize', label: '评测集样本量（条）', type: 'number' }
+      ],
+      steps: ['收集与清洗样本', '标注评测数据', '设计评分规则', '评测集定稿']
+    },
+    {
+      n: 6, name: '构建与调试', key: false, parallelWith: 5,
+      desc: '搭 Prompt、知识库、工具和工作流，并自测到可以送评。',
+      fields: [{ k: 'build', label: '构建记录（版本、改动）', type: 'textarea' }],
+      steps: ['搭建 Prompt 与工作流', '构建知识库', '联调工具与接口', '完成自测']
+    },
+    {
+      n: 7, name: '评测验证', key: true, gate: '是否达标',
+      desc: '用评测集跑一遍，对照验收标准看是否达标。',
+      fields: [
+        { k: 'evalResults', label: '录入评测结果', type: 'results', role: '评测' },
+        { k: 'errors', label: '错误样例（每行一条）', type: 'textarea' }
+      ],
+      steps: ['运行离线评测', '分析错误样例', '上传评测结果']
+    },
+    {
+      n: 8, name: '灰度发布', key: true, gate: '能否全量',
+      desc: '小范围上线，盯住护栏指标，随时准备回滚。',
+      fields: [
+        { k: 'grayScope', label: '灰度范围', type: 'text' },
+        { k: 'grayDuration', label: '灰度时长', type: 'text' },
+        { k: 'graySample', label: '灰度样本量', type: 'number' },
+        { k: 'grayResults', label: '录入灰度期间护栏指标', type: 'results', role: '护栏' },
+        { k: 'rollback', label: '回滚方案', type: 'textarea' }
+      ],
+      steps: ['确定灰度范围与时长', '准备回滚方案', '灰度上线', '上传灰度数据']
+    },
+    {
+      n: 9, name: '线上监控', key: false,
+      desc: '全量后持续观察指标和线上样本，记录出现的问题。可以一直留在这一阶段；出现问题时发起迭代，或结束项目。',
+      fields: [{ k: 'monitor', label: '监控记录', type: 'textarea' }],
+      steps: ['搭建线上监控看板', '定期抽检线上样本', '记录线上问题']
+    },
+    {
+      n: 10, name: '失败回流与迭代', key: false,
+      desc: '把线上失败变成新的评测用例，回到评测集构建或构建调试，开始下一轮。',
+      fields: [{ k: 'failures', label: '线上失败案例（每行一条）', type: 'textarea' }],
+      steps: ['汇总线上失败案例', '把失败案例转为评测用例', '确定回流阶段']
+    }
+  ];
+
+  const ROLES = ['北极星', '评测', '护栏'];
+
+  function stageByN(n) { return STAGES.find(s => s.n === Number(n)); }
+
+  const api = { STAGES, ROLES, stageByN };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.Stages = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+// 规则层：只检查客观条件（填没填、数字达没达标），需要判断的交给 AI 建议层。
+(function (root) {
+  const S = (typeof module !== 'undefined' && module.exports) ? require('./stages.js') : root.Stages;
+
+  const filled = v => typeof v === 'string' ? v.trim().length > 0 : v !== undefined && v !== null && v !== '';
+  const num = v => (v === '' || v === null || v === undefined || isNaN(Number(v))) ? null : Number(v);
+
+  function f(project, n) { return (project.stages[n] && project.stages[n].fields) || {}; }
+  function metrics(project) { return f(project, 3).metrics || []; }
+
+  // 实测值校验：必须是有限数字；单位为 % 时在 0 到 100 之间
+  function actualProblem(metric, actual) {
+    if (actual === '' || actual === null || actual === undefined) return 'empty';
+    const a = Number(actual);
+    if (!isFinite(a)) return '不是有效数字';
+    if ((metric.unit || '').trim() === '%' && (a < 0 || a > 100)) return '百分比应在 0 到 100 之间';
+    return '';
+  }
+  // 返回 true 达标、false 未达标、null 未填或格式无效
+  function meets(metric, actual) {
+    if (actualProblem(metric, actual)) return null;
+    const a = Number(actual), t = num(metric.threshold);
+    if (t === null) return null;
+    return metric.op === '<=' ? a <= t : a >= t;
+  }
+  const posInt = v => { const n = Number(v); return v !== '' && v !== null && v !== undefined && Number.isInteger(n) && n > 0; };
+
+  function fmt(m, actual) {
+    const u = m.unit || '';
+    return `${m.name}：${actual === undefined || actual === '' ? '未填' : actual + u}（标准 ${m.op === '<=' ? '≤' : '≥'} ${m.threshold}${u}）`;
+  }
+
+  // 检查某一类指标的结果是否都达标
+  function checkResults(project, role, resultsKey, stageN) {
+    const list = metrics(project).filter(m => m.role === role);
+    const res = f(project, stageN)[resultsKey] || {};
+    if (list.length === 0) {
+      return [{ label: `第 3 阶段定义了${role}指标`, pass: false, detail: `没有找到${role}指标，无法判断是否达标` }];
+    }
+    return list.map(m => {
+      const prob = actualProblem(m, res[m.id]);
+      const ok = meets(m, res[m.id]);
+      return {
+        label: `${m.name} 达标`,
+        pass: ok === true,
+        detail: prob === 'empty' ? `${m.name}：还没有填结果` : prob ? `${m.name}：录入值无效（${prob}）` : fmt(m, res[m.id]),
+        metricId: m.id
+      };
+    });
+  }
+
+  function stepsFinished(project, n) {
+    const steps = (project.stages[n] && project.stages[n].steps) || [];
+    return steps.length > 0 && steps.every(s => s.status === 'done' || s.status === 'skipped');
+  }
+  function stepsRule(p, n, name) {
+    const steps = p.stages[n].steps || [];
+    const skipped = steps.filter(s => s.status === 'skipped').length;
+    const left = steps.filter(s => s.status === 'todo' || s.status === 'doing').length;
+    return {
+      label: `第 ${n} 阶段（${name}）步骤已处理`,
+      pass: stepsFinished(p, n),
+      detail: left ? `还有 ${left} 个步骤未完成` : skipped ? `其中 ${skipped} 个步骤是跳过的（例外，已留痕）` : ''
+    };
+  }
+
+  // 结果是否按当前版本录入：标准、评测集、构建任何一个变了，旧结果就过期
+  function resultsCurrent(p, n) {
+    const meta = n === 7 ? f(p, 7).evalMeta : f(p, 8).grayMeta;
+    const v = p.ver || { std: 1, evalset: 1, build: 1 };
+    if (!meta) return false;
+    const keys = n === 7 ? ['std', 'evalset', 'build'] : ['std', 'build'];
+    return keys.every(k => meta[k] === v[k]);
+  }
+  // 依据修订号：本工具记录的标准、评测集、构建修订次数，不是 Prompt 或模型的版本号
+  function verText(v, n) { return `标准修订 ${v.std}${n === 8 ? '' : `、评测集修订 ${v.evalset}`}、构建修订 ${v.build}`; }
+  function versionRule(p, n) {
+    const meta = n === 7 ? f(p, 7).evalMeta : f(p, 8).grayMeta;
+    const v = p.ver || { std: 1, evalset: 1, build: 1 };
+    const ok = resultsCurrent(p, n);
+    const cur = verText(v, n);
+    const old = meta ? verText(meta, n) : '';
+    return { label: '结果基于当前版本', pass: ok, detail: ok ? cur : meta ? `结果按 ${old} 录入，当前为 ${cur}，需要重新录入` : '还没有录入结果' };
+  }
+
+  function metricProblems(m) {
+    const t = num(m.threshold);
+    if (!filled(m.name)) return '有指标没写名称';
+    if (!['>=', '<='].includes(m.op)) return `${m.name} 方向无效`;
+    if (t === null || !isFinite(t)) return `${m.name} 缺阈值`;
+    if ((m.unit || '').trim() === '%' && (t < 0 || t > 100)) return `${m.name} 的百分比阈值应在 0 到 100 之间`;
+    return '';
+  }
+
+  const hasEvidence = (p, n, type) => (p.stages[n].evidence || []).some(e => e.type === type);
+
+  const GATES = {
+    2: p => {
+      const a = f(p, 1), b = f(p, 2);
+      return [
+        { label: '第 1 阶段：业务目标已填写', pass: filled(a.goal) },
+        { label: '第 1 阶段：不可接受的结果已填写', pass: filled(a.unacceptable) },
+        { label: '第 1 阶段：预算已填写', pass: filled(a.budget) },
+        { label: '可行性结论已填写', pass: filled(b.feasibility), detail: b.feasibility ? `结论：${b.feasibility}` : '' },
+        { label: '可行性结论不是「不可行」', pass: b.feasibility !== '不可行', detail: b.feasibility === '不可行' ? '结论为不可行，不能立项；如有例外请强制放行并说明' : '' },
+        { label: '成本估算已填写', pass: filled(b.cost) }
+      ];
+    },
+    3: p => {
+      const ms = metrics(p);
+      const probs = ms.map(metricProblems).filter(Boolean);
+      return [
+        { label: '至少 1 个北极星指标并设了目标值', pass: ms.some(m => m.role === '北极星' && num(m.threshold) !== null) },
+        { label: '至少 1 个评测指标（第 7 阶段要用）', pass: ms.some(m => m.role === '评测') },
+        { label: '至少 1 个护栏指标', pass: ms.some(m => m.role === '护栏') },
+        { label: '每个指标的名称、方向、阈值都有效', pass: ms.length > 0 && probs.length === 0, detail: probs.join('；') },
+        { label: '灰度最少样本量已设定（正整数）', pass: posInt(f(p, 3).minGraySample), detail: posInt(f(p, 3).minGraySample) ? `最少 ${f(p, 3).minGraySample}` : '' }
+      ];
+    },
+    4: p => {
+      const x = f(p, 4);
+      const out = [
+        { label: 'PRD 内容已记录，或已关联 PRD 材料', pass: filled(x.prd) || hasEvidence(p, 4, 'PRD'), detail: hasEvidence(p, 4, 'PRD') ? '已关联 PRD 材料' : '' },
+        { label: '评审结论已记录', pass: filled(x.review), detail: x.review ? `结论：${x.review}` : '' }
+      ];
+      if (x.review === '不通过') out.push({ label: '评审结论为通过或有条件通过', pass: false, detail: '评审未通过，不能进入下一阶段' });
+      if (x.review === '有条件通过') {
+        const lines = (x.issues || '').split('\n').map(s => s.trim()).filter(Boolean);
+        const bad = lines.filter(l => { const parts = l.split(/[|｜]/); return parts.length < 2 || !parts[1].trim(); });
+        out.push({
+          label: '每条遗留问题都标了处理方式',
+          pass: lines.length > 0 && bad.length === 0,
+          detail: lines.length === 0 ? '有条件通过，但没有记录遗留问题' : bad.map(l => `缺处理方式：${l}`).join('；')
+        });
+      }
+      return out;
+    },
+    7: p => {
+      const e = f(p, 5);
+      const size = posInt(e.evalSize) ? Number(e.evalSize) : null;
+      return [
+        { label: '第 3 阶段验收标准已确认', pass: !!(p.stages[3] && p.stages[3].gatePassed) },
+        { label: '评测集已登记（说明与样本量）', pass: filled(e.evalset) && size !== null, detail: size ? `样本量 ${size} 条` : '样本量须为正整数' },
+        stepsRule(p, 5, '评测集构建'),
+        stepsRule(p, 6, '构建与调试'),
+        versionRule(p, 7),
+        ...checkResults(p, '评测', 'evalResults', 7)
+      ];
+    },
+    8: p => {
+      const x = f(p, 8);
+      const n = posInt(x.graySample) ? Number(x.graySample) : null;
+      const min = posInt(f(p, 3).minGraySample) ? Number(f(p, 3).minGraySample) : null;
+      return [
+        { label: '第 7 关「是否达标」仍然有效', pass: !!(p.stages[7] && p.stages[7].gatePassed), detail: p.stages[7] && p.stages[7].gatePassed ? (p.stages[7].forced ? '第 7 关是强制放行的' : '') : '标准或构建变更后第 7 关已失效，需要重新评测' },
+        { label: '灰度范围已记录', pass: filled(x.grayScope) },
+        { label: '灰度时长已记录', pass: filled(x.grayDuration) },
+        { label: '灰度样本量达到最少要求', pass: n !== null && min !== null && n >= min, detail: min === null ? '第 3 阶段没有设定灰度最少样本量' : n === null ? `样本量须为正整数（最少 ${min}）` : `样本量 ${n}，最少 ${min}${n < min ? '，不够，不能据此全量' : ''}` },
+        versionRule(p, 8),
+        ...checkResults(p, '护栏', 'grayResults', 8).map(r => ({ ...r, label: r.label.replace('达标', '未越线') })),
+        { label: '回滚方案已填写', pass: filled(x.rollback) }
+      ];
+    }
+  };
+
+  function checkGate(project, n) {
+    const fn = GATES[n];
+    return fn ? fn(project) : [];
+  }
+
+  // 规则算出的"下一步"：当前阶段第一个没做完的步骤 → 关卡 → 下一阶段
+  function nextStep(project) {
+    const n = project.currentStage;
+    if (project.status === 'closed') return { kind: 'closed', stage: n, text: '项目已结束' };
+    if (project.status === 'terminated') return { kind: 'closed', stage: n, text: '项目已终止' };
+    const stage = S.stageByN(n);
+    const steps = (project.stages[n] && project.stages[n].steps) || [];
+    const pending = steps.find(s => s.status === 'todo' || s.status === 'doing');
+    if (pending) return { kind: 'step', stage: n, step: pending, text: `完成「${pending.title}」` };
+    if (stage.key && !project.stages[n].gatePassed) return { kind: 'gate', stage: n, text: `推进关卡：${stage.gate}` };
+    if (n === 10) return { kind: 'backflow', stage: n, text: '把失败案例回流到第 5 或第 6 阶段，开始下一轮' };
+    if (n === 9) return { kind: 'monitor', stage: n, text: '持续监控；出现问题时发起迭代，或结束项目' };
+    return { kind: 'advance', stage: n, text: `进入第 ${n + 1} 阶段：${S.stageByN(n + 1).name}` };
+  }
+
+  const api = { checkGate, nextStep, meets, actualProblem, stepsFinished, resultsCurrent, verText, GATES };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.Rules = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+// 推进引擎：所有改变阶段、关卡状态的动作都走这里，保证"规则拦人"在任何路径上都成立。
+// 纯逻辑，不碰界面，可以在 Node 里单独测试。
+(function (root) {
+  const isNode = typeof module !== 'undefined' && module.exports;
+  const S = isNode ? require('./stages.js') : root.Stages;
+  const R = isNode ? require('./rules.js') : root.Rules;
+
+  const now = () => new Date().toISOString();
+  const KIND_NAME = { std: '验收标准', evalset: '评测集', build: '构建' };
+  // 哪类变化会让哪些关卡失效
+  const INVALIDATES = { std: [3, 7, 8], evalset: [7, 8], build: [7, 8] };
+
+  // 旧数据补默认值
+  function ensure(p) {
+    p.ver = p.ver || { std: 1, evalset: 1, build: 1 };
+    p.status = p.status || 'active';
+    p.doc = p.doc || { text: '', files: [] };
+    p.metricHistory = Array.isArray(p.metricHistory) ? p.metricHistory : [];
+    (p.doc.files || []).forEach(f => { if (!f.id) f.id = 'm' + Math.random().toString(36).slice(2, 10); });
+    S.STAGES.forEach(s => {
+      const st = p.stages[s.n];
+      st.evidence = st.evidence || [];
+      st.fields = st.fields || {};
+    });
+    return p;
+  }
+
+  function resetGate(p, n) {
+    const st = p.stages[n];
+    const was = st.gatePassed;
+    st.gatePassed = false; st.forced = false; st.lastGate = null;
+    return was;
+  }
+
+  // 当前版本是否已经"被用过"（关卡通过过，或有结果是按这个版本录的）
+  function inUse(p, kind) {
+    const v = p.ver[kind];
+    const e = p.stages[7].fields.evalMeta, g = p.stages[8].fields.grayMeta;
+    const metaUses = m => m && m[kind] === v;
+    return INVALIDATES[kind].some(n => p.stages[n].gatePassed) || metaUses(e) || metaUses(g);
+  }
+
+  // 标准、评测集或构建发生变化：如果当前版本已被用过，版本号加一，相关关卡失效，旧结果变成过期
+  function touch(p, kind) {
+    ensure(p);
+    if (!inUse(p, kind)) return null;
+    const from = p.ver[kind];
+    p.ver[kind] = from + 1;
+    const reset = INVALIDATES[kind].filter(n => resetGate(p, n));
+    return { kind, name: KIND_NAME[kind], from, to: p.ver[kind], reset };
+  }
+
+  function stampResults(p, n) {
+    const key = n === 7 ? 'evalMeta' : 'grayMeta';
+    p.stages[n].fields[key] = { ...p.ver, at: now() };
+  }
+
+  function clearResults(p, n) {
+    const f = p.stages[n].fields;
+    const rKey = n === 7 ? 'evalResults' : 'grayResults';
+    const old = { ...(f[rKey] || {}) };
+    f[rKey] = {};
+    stampResults(p, n);
+    return old;
+  }
+
+  function hasValues(obj) { return obj && Object.values(obj).some(v => v !== '' && v !== null && v !== undefined); }
+
+  // ---------- 依赖关系表：什么变化让什么失效 ----------
+  // 版本类变化：改的是"判定口径或被测对象"本身
+  //   验收标准（指标的类型、方向、阈值、单位，增删指标）→ 标准版本，失效第 3、7、8 关
+  //   评测集（第 5 阶段的说明、样本量、步骤增删、步骤产出、步骤完成状态）→ 评测集版本，失效第 7、8 关
+  //   构建（第 6 阶段的构建记录、步骤增删、步骤产出、步骤完成状态）→ 构建版本，失效第 7、8 关
+  // 不算版本变化：指标显示名称、步骤备注、风险标记、步骤排序
+  // 其余变化（评测结果、评审结论、第 1、2 阶段字段等）不升版本，但会触发"已通过关卡复核"：
+  //   已通过（非强制）的关卡如果按当前数据不再满足规则，就撤销，并连带撤销它之后已通过的关卡
+  const METRIC_DEF_KEYS = ['role', 'op', 'threshold', 'unit', 'add', 'delete'];
+  const STEP_VERSION_ACTIONS = ['add', 'delete', 'output', 'done'];
+  function versionKindOf(c) {
+    if (c.type === 'metric') return METRIC_DEF_KEYS.includes(c.key) ? 'std' : null;
+    if (c.type === 'field') return c.stage === 5 ? 'evalset' : c.stage === 6 ? 'build' : null;
+    if (c.type === 'step') return STEP_VERSION_ACTIONS.includes(c.key) ? (c.stage === 5 ? 'evalset' : c.stage === 6 ? 'build' : null) : null;
+    return null;
+  }
+
+  const norm = v => (v === undefined || v === null) ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v).trim();
+
+  // 已通过的关卡复核：不再满足规则就撤销，并连带撤销之后的关卡（强制放行的关卡视为有意例外，复核时跳过，但会被连带撤销）
+  function revalidate(p) {
+    const revoked = [];
+    const keys = S.STAGES.filter(s => s.key).map(s => s.n);
+    for (const k of keys) {
+      const st = p.stages[k];
+      if (!st.gatePassed || st.forced) continue;
+      const fails = R.checkGate(p, k).filter(r => !r.pass);
+      if (fails.length) {
+        resetGate(p, k);
+        const cascade = keys.filter(j => j > k && p.stages[j].gatePassed);
+        cascade.forEach(j => resetGate(p, j));
+        revoked.push({ n: k, fails: fails.map(r => r.label), cascade });
+      }
+    }
+    return revoked;
+  }
+
+  // 统一变更入口：所有会改变依据的修改都走这里
+  // c = { type: 'field'|'metric'|'step'|'result'|'evidence', stage, key, before, after }
+  function applyChange(p, c) {
+    ensure(p);
+    if (c.before !== undefined && norm(c.before) === norm(c.after)) return { skipped: true, versions: [], revoked: [] };
+    const versions = [];
+    const kind = versionKindOf(c);
+    if (kind) { const t = touch(p, kind); if (t) versions.push(t); }
+    const revoked = revalidate(p);
+    return { skipped: false, versions, revoked };
+  }
+
+  // 前置关卡确认（不移动当前阶段）：用于"未核验"阶段补确认，或依据变化后重新确认
+  function confirmGate(p, n) {
+    ensure(p);
+    const s = S.stageByN(n);
+    if (!s || !s.key || n >= p.currentStage) return { ok: false, reason: '只能确认当前阶段之前的关卡' };
+    const rules = R.checkGate(p, n);
+    if (!rules.every(r => r.pass)) return { ok: false, reason: '规则检查未通过', rules };
+    p.stages[n].gatePassed = true; p.stages[n].forced = false; p.stages[n].lastGate = 'pass';
+    return { ok: true, rules };
+  }
+
+  // AI 建议依据的签名：建议实际用到的数据（阶段产出、指标、版本、关联材料、相关阶段）
+  function inputSignature(p, n) {
+    const pick = k => p.stages[k] ? { f: p.stages[k].fields, e: (p.stages[k].evidence || []).map(x => x.id || x.name), s: p.stages[k].steps.map(x => [x.title, x.status, x.output || '']) } : null;
+    const related = n === 7 ? [5, 6, 7] : n === 8 ? [7, 8] : n === 10 ? [9, 10] : [n];
+    return JSON.stringify({ n, ver: p.ver, m: p.stages[3].fields.metrics || [], r: related.map(pick) });
+  }
+
+  // 指标历史：每次关卡检查（第 7、8 关）和清空旧结果时记一笔，用来画趋势
+  function recordResults(p, n, values, meta) {
+    ensure(p);
+    const role = n === 7 ? '评测' : '护栏';
+    const ms = (p.stages[3].fields.metrics || []).filter(m => m.role === role);
+    const src = values || p.stages[n].fields[n === 7 ? 'evalResults' : 'grayResults'] || {};
+    const vals = {};
+    ms.forEach(m => { const v = src[m.id]; if (!R.actualProblem(m, v)) vals[m.id] = Number(v); }); // 只记有效值
+    if (!Object.keys(vals).length) return null;
+    const ver = { ...(meta || p.stages[n].fields[n === 7 ? 'evalMeta' : 'grayMeta'] || p.ver) };
+    delete ver.at;
+    const last = p.metricHistory.filter(h => h.stage === n).slice(-1)[0];
+    if (last && JSON.stringify(last.values) === JSON.stringify(vals) && JSON.stringify(last.ver) === JSON.stringify(ver)) return null;
+    const entry = { t: now(), stage: n, iteration: p.iteration, ver, values: vals };
+    p.metricHistory.push(entry);
+    return entry;
+  }
+
+  // 统一的前进入口：只能前进一步；关键节点在这一刻重新检查规则
+  function advance(p, opts = {}) {
+    ensure(p);
+    const n = p.currentStage, s = S.stageByN(n);
+    if (p.status !== 'active') return { ok: false, reason: '项目不在进行中' };
+    if (n >= 10) return { ok: false, reason: '第 10 阶段只能回流，不能再前进' };
+    const rules = R.checkGate(p, n);
+    const pass = rules.every(r => r.pass);
+    if (s.key) {
+      if (!pass && !opts.force) return { ok: false, reason: '规则检查未通过', rules };
+      p.stages[n].gatePassed = true;
+      p.stages[n].forced = !pass && !!opts.force;
+      p.stages[n].lastGate = pass ? 'pass' : 'fail';
+      if (p.stages[n].forced) p.risk = true;
+    }
+    p.currentStage = n + 1;
+    return { ok: true, rules, forced: s.key && !pass };
+  }
+
+  // 回退：途经的关卡全部重置；从评测之后回到构建或评测集，说明要返工，旧结果不能再用
+  function back(p, target, note) {
+    ensure(p);
+    const n = p.currentStage;
+    if (target >= n) return { ok: false };
+    for (let k = target; k <= n; k++) if (S.stageByN(k).key) resetGate(p, k);
+    const changes = [];
+    if (n >= 7 && target <= 6) {
+      const c = touch(p, target === 5 ? 'evalset' : 'build');
+      if (c) changes.push(c);
+    }
+    if (note) p.stages[target].steps.push(makeStepLike(`返工：${note}`));
+    p.currentStage = target;
+    return { ok: true, changes };
+  }
+
+  function makeStepLike(title) {
+    return { id: Math.random().toString(36).slice(2, 10), title, status: 'todo', risk: '', note: '', output: '' };
+  }
+
+  // 失败回流：开始新一轮
+  function backflow(p, target) {
+    ensure(p);
+    const fails = (p.stages[10].fields.failures || '').split('\n').map(s => s.trim()).filter(Boolean);
+    p.iteration += 1;
+    for (let k = target; k <= 10; k++) {
+      p.stages[k].steps.forEach(x => { x.status = 'todo'; });
+      if (S.stageByN(k).key) resetGate(p, k);
+    }
+    p.ver[target === 5 ? 'evalset' : 'build'] += 1;
+    if (target === 5) p.ver.build += 1;
+    p.stages[7].fields.evalResults = {}; p.stages[7].fields.evalMeta = null;
+    p.stages[8].fields.grayResults = {}; p.stages[8].fields.grayMeta = null;
+    fails.forEach(f => p.stages[target].steps.push(makeStepLike(target === 5 ? `新增评测用例：${f}` : `修复线上问题：${f}`)));
+    p.stages[10].fields.failures = '';
+    p.currentStage = target;
+    return { fails };
+  }
+
+  // 决策依据快照：当时的规则明细、指标实测与阈值、版本、关联材料、AI 完整建议
+  function snapshot(p, n, rules, advice) {
+    const ms = (p.stages[3].fields.metrics || []);
+    const ev = p.stages[7].fields.evalResults || {}, gr = p.stages[8].fields.grayResults || {};
+    const metrics = ms.map(m => ({
+      name: m.name, role: m.role, op: m.op, threshold: m.threshold, unit: m.unit || '',
+      actual: m.role === '评测' ? ev[m.id] : m.role === '护栏' ? gr[m.id] : undefined
+    }));
+    const related = n === 7 ? [5, 6, 7] : n === 8 ? [7, 8] : n === 10 ? [9, 10] : [n];
+    const fields = {};
+    related.forEach(k => { fields[k] = JSON.parse(JSON.stringify(p.stages[k].fields || {})); });
+    return {
+      at: now(), stage: n, ver: { ...p.ver },
+      rules: (rules || []).map(r => ({ label: r.label, pass: r.pass, detail: r.detail || '' })),
+      metrics,
+      fields,
+      resultMeta: { eval: p.stages[7].fields.evalMeta || null, gray: p.stages[8].fields.grayMeta || null },
+      evidence: (p.stages[n].evidence || []).map(e => ({ ...e })),
+      advice: advice ? { summary: advice.summary, reason: advice.reason, alternatives: advice.alternatives || [], source: advice.source, preset: !!advice.preset, suggestedStage: advice.suggestedStage } : null
+    };
+  }
+
+  // 用来判断"拍板时的依据和打开关卡时是否一致"
+  function signature(rules) {
+    return JSON.stringify((rules || []).map(r => [r.label, r.pass, r.detail || '']));
+  }
+
+  const api = { ensure, touch, stampResults, clearResults, hasValues, advance, back, backflow, snapshot, signature, inputSignature, applyChange, revalidate, confirmGate, versionKindOf, recordResults, KIND_NAME };
+  if (isNode) module.exports = api; else root.Engine = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+// AI 建议层。两种模式：
+//   model —— 通过本地 server.js 代理调用兼容 OpenAI 接口的大模型
+//   demo  —— 没有配置模型时，用内置规则模板生成建议，保证演示稳定
+(function (root) {
+  const { STAGES, stageByN } = root.Stages;
+
+  const AI = { mode: 'demo', modelName: '', available: false };
+
+  AI.init = async function () {
+    if (window.STATIC_DEMO) { AI.available = false; AI.mode = 'demo'; return; }
+    try {
+      const r = await fetch('api/config');
+      if (!r.ok) throw new Error();
+      const c = await r.json();
+      AI.available = !!c.aiEnabled;
+      AI.modelName = c.model || '';
+      AI.mode = AI.available ? 'model' : 'demo';
+    } catch (e) {
+      AI.available = false; AI.mode = 'demo';
+    }
+  };
+
+  async function callModel(system, user) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 60000);
+    try {
+      const r = await fetch('api/llm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [{ role: 'system', content: system }, { role: 'user', content: user }] }),
+        signal: ctrl.signal
+      });
+      const data = await r.json().catch(e => { if (e.name === 'AbortError') throw e; return {}; });
+      if (!r.ok) throw new Error(data.error || '模型调用失败');
+      return parseJSON(data.content);
+    } catch (e) {
+      if (e.name === 'AbortError') throw new Error('模型响应超时（60 秒）');
+      throw e;
+    } finally { clearTimeout(timer); }
+  }
+
+  function parseJSON(text) {
+    const clean = String(text).replace(/```json|```/g, '').trim();
+    const a = clean.indexOf('{'), b = clean.lastIndexOf('}');
+    if (a < 0 || b < 0) throw new Error('模型没有返回 JSON');
+    return JSON.parse(clean.slice(a, b + 1));
+  }
+
+  const clampStage = n => Math.min(10, Math.max(1, parseInt(n, 10) || 1));
+  const stageList = () => STAGES.map(s => `${s.n}. ${s.name}${s.key ? `（关键节点：${s.gate}）` : ''}`).join('\n');
+
+  // ---------- 1. 文档判断 + 拆解 ----------
+
+  // docs: [{name, text}]，可以是一份也可以是多份
+  const TYPES = ['需求描述', 'BRD', 'PRD', '评审纪要', '评测报告', '其他材料'];
+  const TYPE_STAGE = { '需求描述': 1, 'BRD': 2, 'PRD': 4, '评审纪要': 5, '评测报告': 7, '其他材料': 1 };
+
+  function joinDocs(docs) {
+    return docs.map((d, i) => `=== 文件 ${i + 1}：${d.name} ===\n${d.text}`).join('\n\n');
+  }
+
+  AI.analyze = async function (docs) {
+    if (AI.mode === 'model') {
+      try {
+        const out = await callModel(
+          `你是资深 AI 产品经理助手。用户会给你同一个 AI 项目的一份或多份文档。你要做三件事：
+1）逐个文件判断类型（${TYPES.join(' / ')}），各用一句话说明理由；
+2）综合所有文件，判断项目当前处于哪个阶段（以进度最靠后、且有实际产出的文件为准），并列出项目层面缺失的关键信息；
+3）按下面固定的 10 个阶段，为每个阶段列出 2-5 个"该做什么"的步骤。步骤只写要做的事，不要替用户编造答案、数字或结论。
+
+固定阶段：
+${stageList()}
+
+只返回 JSON，不要任何其他文字：
+{"projectName":"根据文档内容拟定的项目名，不超过 12 个字，不要带文档类型或版本号","files":[{"name":"文件名","type":"类型","reason":"一句话理由"}],"stageGuess":1,"reason":"为什么从这个阶段开始","missing":["缺失信息1"],"steps":{"1":["步骤"],...,"10":["步骤"]}}`,
+          joinDocs(docs)
+        );
+        return normalizeAnalysis(out, docs, 'model');
+      } catch (e) {
+        const fb = demoAnalyze(docs);
+        fb.warning = `模型调用失败，已改用演示模式：${e.message}`;
+        return fb;
+      }
+    }
+    return demoAnalyze(docs);
+  };
+
+  function summarizeTypes(files) {
+    const uniq = [...new Set(files.map(f => f.type))];
+    return files.length === 1 ? uniq[0] : `${uniq.join('、')}（共 ${files.length} 份）`;
+  }
+
+  function normalizeAnalysis(o, docs, source) {
+    const steps = {};
+    STAGES.forEach(s => {
+      const arr = o.steps && (o.steps[s.n] || o.steps[String(s.n)]);
+      steps[s.n] = Array.isArray(arr) && arr.length ? arr.map(String).slice(0, 8) : s.steps.slice();
+    });
+    const byName = {};
+    (Array.isArray(o.files) ? o.files : []).forEach(f => { byName[f.name] = f; });
+    const files = docs.map(d => {
+      const f = byName[d.name] || {};
+      return { name: d.name, type: TYPES.includes(f.type) ? f.type : '其他材料', reason: String(f.reason || '') };
+    });
+    const pn = String(o.projectName || '').trim();
+    return {
+      projectName: pn && pn.length <= 20 ? pn : guessName(docs),
+      files, docType: summarizeTypes(files),
+      reason: String(o.reason || ''),
+      stageGuess: clampStage(o.stageGuess),
+      missing: Array.isArray(o.missing) ? o.missing.map(String) : [],
+      steps, source
+    };
+  }
+
+  function classify(t) {
+    const has = words => words.some(w => t.includes(w));
+    if (has(['评测结果', '评测报告', '测试结果', '错误样例', 'bad case', 'Bad case'])) return ['评测报告', '包含评测结果或错误样例，说明已经进入评测验证。'];
+    if (has(['准确率', '召回率', '漏检率']) && has(['样本数', '评测集'])) return ['评测报告', '包含按样本统计的评测指标，属于评测结果明细。'];
+    if (has(['评审']) && has(['纪要', '会议', '参会', '结论'])) return ['评审纪要', '记录了评审会的讨论和结论。'];
+    if (has(['功能清单', '功能需求', '交互', '页面', '字段说明', 'PRD', '验收标准'])) return ['PRD', '包含功能、交互或验收层面的具体方案。'];
+    if (has(['ROI', '收益', '投入产出', '立项', '商业价值', '市场规模'])) return ['BRD', '包含收益、成本或立项论证。'];
+    if (has(['纪要', '会议', '周报', '参会'])) return ['其他材料', '会议或过程记录，不单独决定项目阶段。'];
+    return ['需求描述', '只描述了问题和大方向，没有成本收益论证，也没有具体方案。'];
+  }
+
+  // 演示模式下的项目名拟定：优先用文档标题，其次用文件名，再次从正文里找"用 AI 做什么"
+  const TYPE_WORDS = /(离线评测报告|评测结果明细|评测结果|评测报告|评审会议纪要|会议纪要|纪要|需求描述|需求文档|产品需求|立项说明|立项|BRD|PRD|示例|虚构|第.轮|v\d+(\.\d+)*|（[^）]*）|\([^)]*\))/gi;
+  function cleanTitle(t) {
+    return String(t).replace(/^#+\s*/, '').replace(TYPE_WORDS, ' ')
+      .split(/[｜|:：—]|\s-\s/).map(x => x.replace(/^[\d\s_.\-]+/, '').replace(/[\s_\-·,，。]+$/g, '').trim()).filter(x => x.length >= 2)[0] || '';
+  }
+  function guessName(docs) {
+    const count = {};
+    const add = n => { if (n && n.length >= 2 && n.length <= 20 && !/[,，]/.test(n)) count[n] = (count[n] || 0) + 1; };
+    docs.forEach(d => {
+      const first = (d.text || '').split('\n').map(x => x.trim()).find(Boolean) || '';
+      if (first.length <= 40) add(cleanTitle(first));
+      const book = (d.text || '').match(/《([^》]{2,30})》/);
+      if (book) add(cleanTitle(book[1]));
+    });
+    let best = Object.keys(count).sort((a, b) => count[b] - count[a] || a.length - b.length)[0];
+    if (!best) {
+      docs.forEach(d => { if (d.name !== '补充说明') add(cleanTitle(d.name.replace(/\.[^.]+$/, '').replace(/_/g, ' '))); });
+      best = Object.keys(count).sort((a, b) => count[b] - count[a])[0];
+    }
+    if (!best) {
+      const all = docs.map(d => d.text).join('\n');
+      const m = all.match(/用\s*AI\s*([^，,。；\n]{2,14})/);
+      if (m) best = `AI ${m[1].trim()}`;
+    }
+    return best || '未命名项目';
+  }
+  AI.guessName = guessName;
+
+  function demoAnalyze(docs) {
+    const files = docs.map(d => { const [type, reason] = classify(d.text || ''); return { name: d.name, type, reason }; });
+    let top = files[0], stageGuess = TYPE_STAGE[files[0].type];
+    files.forEach(f => { if (TYPE_STAGE[f.type] > stageGuess) { stageGuess = TYPE_STAGE[f.type]; top = f; } });
+    // 评审纪要里写明"不通过"时，停在第 4 阶段
+    const all = docs.map(d => d.text).join('\n');
+    if (top.type === '评审纪要' && /不通过/.test(all) && !/有条件通过|评审通过|结论：通过/.test(all)) stageGuess = 4;
+    const has = words => words.some(w => all.includes(w));
+    const missing = [];
+    if (!/\d+(\.\d+)?\s*%/.test(all) || !has(['目标', '提升到', '达到'])) missing.push('目标值没写清：提升到多少算成功？');
+    if (!has(['预算', '成本', '投入'])) missing.push('预算和成本没有提到');
+    if (!has(['数据', '记录', '样本'])) missing.push('数据从哪来、能不能拿到没有说明');
+    if (!has(['合规', '隐私', '授权', '风险'])) missing.push('没有提到隐私、合规等风险');
+    if (!has(['不能', '不可接受', '底线', '避免'])) missing.push('没有说明哪些结果绝对不能接受');
+    if (stageGuess >= 7 && !has(['回滚', '灰度'])) missing.push('还没有灰度和回滚方案');
+    const steps = {};
+    STAGES.forEach(s => { steps[s.n] = s.steps.slice(); });
+    const reason = files.length > 1
+      ? `以进度最靠后的文件为准：「${top.name}」是${top.type}，当前工作阶段判断为第 ${stageGuess} 阶段。这不代表前面阶段的产出都已存在，前面的阶段会标记为「未核验」，需要你对照材料确认。`
+      : top.reason;
+    return { projectName: guessName(docs), files, docType: summarizeTypes(files), reason, stageGuess, missing, steps, source: 'demo' };
+  }
+
+  // ---------- 2. 下一步建议 ----------
+
+  AI.advise = async function (project, ctx) {
+    if (AI.mode === 'model') {
+      try {
+        const out = await callModel(
+          `你是资深 AI 产品经理助手，负责在项目推进时给出"下一步建议"。最终决定由产品经理做出，你只提供建议和理由。
+建议要具体：指出问题出在哪，建议去哪个阶段做什么，并说明为什么不是别的路线。
+信息不足时直接说明缺什么，不要编造数据。
+
+固定阶段：
+${stageList()}
+
+只返回 JSON：
+{"summary":"一句话建议","reason":"2-4 句理由，引用具体指标或错误样例；证据不足以下结论时，写成待验证的假设并给出验证方法","suggestedStage":数字,"alternatives":[{"stage":数字,"desc":"另一条路线及其代价"}]}
+suggestedStage 只能是当前阶段、下一阶段，或之前的某个阶段；关键节点的规则没有全部通过时，不要建议前进。`,
+          buildContext(project, ctx)
+        );
+        return {
+          summary: String(out.summary || ''),
+          reason: String(out.reason || ''),
+          suggestedStage: clampStage(out.suggestedStage || ctx.stage),
+          alternatives: (out.alternatives || []).slice(0, 3).map(a => ({ stage: clampStage(a.stage), desc: String(a.desc || '') })),
+          source: 'model'
+        };
+      } catch (e) {
+        const fb = demoAdvise(project, ctx);
+        fb.warning = `模型调用失败，已改用演示模式：${e.message}`;
+        return fb;
+      }
+    }
+    return demoAdvise(project, ctx);
+  };
+
+  function buildContext(p, ctx) {
+    const st = stageByN(ctx.stage);
+    const fieldsDump = STAGES.map(s => {
+      const x = p.stages[s.n];
+      if (!x) return '';
+      const done = x.steps.filter(z => z.status === 'done').length;
+      const flds = JSON.stringify(x.fields || {});
+      return `第${s.n}阶段 ${s.name}：步骤 ${done}/${x.steps.length} 完成；关卡${s.key ? (x.gatePassed ? '已通过' : '未通过') : '无'}；产出 ${flds}`;
+    }).join('\n');
+    const rules = (ctx.rules || []).map(r => `${r.pass ? '通过' : '未通过'}：${r.label}${r.detail ? '（' + r.detail + '）' : ''}`).join('\n') || '本阶段没有准入规则';
+    const log = (p.log || []).slice(-6).map(l => `${l.stageName || ''} ${l.decision || ''} ${l.reason || ''}`).join('\n');
+    // 关联材料摘录：当前阶段关联的材料，每份最多 1500 字，总计最多 6000 字
+    const files = (p.doc && p.doc.files) || [];
+    let budget = 6000;
+    const ev = ((p.stages[ctx.stage] && p.stages[ctx.stage].evidence) || []).map(e => {
+      const f = files.find(x => (e.id && x.id === e.id) || x.name === e.name);
+      if (!f || budget <= 0) return `【${e.name}】（未读取原文）`;
+      const take = Math.min(1500, budget); budget -= take;
+      const t = String(f.text || '');
+      return `【${e.type}：${e.name}】${t.length > take || f.truncated ? '（节选）' : ''}\n${t.slice(0, take)}`;
+    }).join('\n\n');
+    return `项目：${p.name}
+当前阶段：第${ctx.stage}阶段 ${st.name}
+场景：${ctx.kind === 'gate' ? '产品经理请求推进关键节点「' + st.gate + '」' : ctx.kind === 'backflow' ? '产品经理要把线上失败回流，开始下一轮。suggestedStage 只能是 5（失败属于评测集没覆盖的新类型）或 6（已知类型，直接调构建）' : '产品经理询问下一步'}
+
+规则检查结果：
+${rules}
+
+各阶段情况：
+${fieldsDump}
+
+最近决策记录：
+${log || '无'}
+
+本阶段关联的材料：
+${ev || '无'}`;
+  }
+
+  function demoAdvise(p, ctx) {
+    const n = ctx.stage;
+    const failed = (ctx.rules || []).filter(r => !r.pass);
+    const base = { source: 'demo', alternatives: [] };
+    const fields = (p.stages[n] && p.stages[n].fields) || {};
+
+    // 示例项目的预设剧本：第 7 阶段漏检率未达标。结论写成待验证的假设，并给出验证方法
+    if (p.demo && n === 7 && failed.some(r => r.label.includes('漏检'))) {
+      return {
+        ...base, preset: true,
+        summary: '回到第 6 阶段，优先验证"Prompt 对隐含痛点表达识别不足"这个假设。',
+        reason: '错误样例的分类型统计显示，漏检集中在痛点需求类（60 条中漏检 19 条，约 32%），明确咨询类较少（55 条中漏检 6 条，约 11%）。漏检样例多是"孩子数学一直上不去"这类没有直接提到课程的说法，所以优先怀疑识别环节。验证方法：在 Prompt 中补 3 到 5 条隐含痛点示例，用同一份评测集复测；如果痛点类漏检明显下降，假设成立；如果没有变化，再检查评测集里这类样本的标注口径是否一致。动作准确率 88% 达到了当前阈值，本轮不作为优先项，但不代表出口规则没有问题。',
+        suggestedStage: 6,
+        alternatives: [
+          { stage: 5, desc: '如果复测后痛点类漏检没有改善，回到第 5 阶段核查这类样本的标注口径。' },
+          { stage: 3, desc: '如果业务方能接受更高的漏检率，可以回到第 3 阶段调整阈值，但需要业务方确认并记录理由。' }
+        ]
+      };
+    }
+
+    // 可行性结论为不可行：规则已拦截
+    if (n === 2 && failed.some(r => r.label.includes('不是「不可行」'))) {
+      return { ...base, summary: '可行性结论为"不可行"，建议终止项目，或回到第 1 阶段重新界定问题。', reason: '规则已拦截立项。继续推进意味着在不可行的前提下投入成本。如果不可行的原因可以通过缩小范围解决，回到第 1 阶段重新定义目标；否则终止项目，记录原因。', suggestedStage: 1, alternatives: [{ stage: 2, desc: '如果你判断不可行的因素可以被解决，可以强制放行，但必须写明理由，项目会被标记风险。' }] };
+    }
+
+    const missingFill = failed.filter(r => !r.metricId && !r.label.includes('结论为通过'));
+    const metricFail = failed.filter(r => r.metricId);
+
+    if (ctx.kind === 'gate' && failed.length === 0) {
+      if (false) {
+        return { ...base, summary: '规则已满足，但可行性结论是"不可行"，建议不立项。', reason: '材料都齐了，结论本身是否定的。继续推进意味着在不可行的前提下投入成本。可以回到第 1 阶段重新界定问题范围，或者结束这个项目。', suggestedStage: 1, alternatives: [{ stage: 3, desc: '如果你判断不可行的因素可以被解决，可以强行立项，但要记录理由。' }] };
+      }
+      if (n === 2 && fields.feasibility === '有条件可行') {
+        return { ...base, summary: '可以立项，但要把"条件"写进第 3 阶段的验收标准。', reason: '结论是有条件可行。条件如果不变成可检查的指标，后面很容易被忘掉。建议在第 3 阶段把这些条件设成护栏指标。', suggestedStage: 3, alternatives: [] };
+      }
+      return { ...base, summary: `关卡「${stageByN(n).gate}」的规则全部满足，可以进入第 ${n + 1} 阶段。`, reason: n === 4 ? '评审已通过。下一步评测集构建和构建调试可以并行，建议先把评测集的样本来源定下来，避免调完 Prompt 才发现没法评。' : n === 7 ? '评测指标全部达标。灰度前确认回滚方案，并提前约好灰度期间盯哪几个护栏指标。' : n === 8 ? '灰度期间护栏指标都没有越线，可以全量。全量后第 9 阶段要继续抽检线上样本。' : '前置条件都已具备，没有发现需要回头处理的问题。', suggestedStage: Math.min(10, n + 1), alternatives: [] };
+    }
+
+    if (ctx.kind === 'gate' && metricFail.length && n === 7) {
+      const names = metricFail.map(r => r.detail).join('；');
+      const errText = fields.errors || '';
+      const dataProblem = /样本|数据|评测集|覆盖/.test(errText);
+      return {
+        ...base,
+        summary: dataProblem ? '回到第 5 阶段，先补齐评测集里缺的样本类型。' : '回到第 6 阶段，针对错误样例调整 Prompt 或知识库。',
+        reason: `未达标的指标：${names}。${errText ? '从错误样例看，' + (dataProblem ? '问题和样本覆盖有关，评测本身可能不准，先修评测集再判断模型效果。' : '错误集中在识别和回答环节，属于构建问题，优先调 Prompt 和知识库。') : '还没有上传错误样例，建议先补上，否则很难判断问题出在构建还是数据。'}`,
+        suggestedStage: dataProblem ? 5 : 6,
+        alternatives: [{ stage: 3, desc: '如果业务方能接受当前水平，可以回到第 3 阶段调整阈值，但需要业务方确认。' }]
+      };
+    }
+
+    if (ctx.kind === 'gate' && metricFail.length && n === 8) {
+      return {
+        ...base,
+        summary: '护栏指标越线，建议暂停扩量并回到第 6 阶段排查。',
+        reason: `越线的指标：${metricFail.map(r => r.detail).join('；')}。护栏指标代表"不可接受的结果"，越线时继续放量风险最大。先按回滚方案控制影响，再回到构建阶段定位原因。`,
+        suggestedStage: 6,
+        alternatives: [{ stage: 4, desc: '如果问题出在方案本身（比如转人工规则设计不合理），回到第 4 阶段改方案并重新评审。' }]
+      };
+    }
+
+    if (ctx.kind === 'gate' && n === 4 && fields.review === '不通过') {
+      return { ...base, summary: '评审没通过，留在第 4 阶段修改方案后重新评审。', reason: '先把评审意见逐条记成遗留问题，判断哪些是方案问题、哪些是标准问题。如果争议集中在指标上，需要回到第 3 阶段。', suggestedStage: 4, alternatives: [{ stage: 3, desc: '如果争议在验收标准本身，回到第 3 阶段重新和业务方确认。' }] };
+    }
+
+    if (missingFill.length) {
+      return {
+        ...base,
+        summary: `先留在第 ${n} 阶段，把缺的材料补齐。`,
+        reason: `规则检查没通过的项：${missingFill.map(r => r.label).join('；')}。这些都是客观缺项，补齐后再推进。${n === 7 && missingFill.some(r => r.label.includes('第 3 阶段')) ? '验收标准没确认就做评测，等于没有判断依据。' : ''}`,
+        suggestedStage: n,
+        alternatives: []
+      };
+    }
+
+    if (ctx.kind === 'backflow') return backflowAdvice(fields, base);
+
+    // 非关卡：询问下一步
+    const next = root.Rules.nextStep(p);
+    if (next.kind === 'step') {
+      return { ...base, summary: `继续当前阶段：${next.text}。`, reason: `第 ${n} 阶段还有未完成的步骤。${stageByN(n).desc}`, suggestedStage: n, alternatives: n === 5 ? [{ stage: 6, desc: '评测集构建和构建调试可以并行，人手够的话可以同时推进第 6 阶段。' }] : [] };
+    }
+    if (n === 10) return backflowAdvice(fields, base);
+    return { ...base, summary: next.text + '。', reason: '当前阶段的步骤都已完成。', suggestedStage: next.kind === 'advance' ? n + 1 : n, alternatives: [] };
+  }
+
+  function backflowAdvice(fields, base) {
+    const lines = (fields.failures || '').split('\n').filter(s => s.trim());
+    const toEval = lines.some(l => /样本|没覆盖|新类型|新问题/.test(l));
+    return {
+      ...base,
+      summary: toEval ? '回流到第 5 阶段，把新出现的失败类型加进评测集。' : '回流到第 6 阶段，针对线上失败调整构建。',
+      reason: lines.length ? `已记录 ${lines.length} 条线上失败。${toEval ? '其中有评测集没覆盖到的新类型，先补评测集，下一轮评测才能发现同类问题。' : '这些失败属于已知类型，评测集已经覆盖，直接调构建更快。'}` : '还没有记录线上失败案例。建议先在本阶段补充，否则下一轮没有新的评测用例。',
+      suggestedStage: toEval ? 5 : 6,
+      alternatives: [{ stage: toEval ? 6 : 5, desc: toEval ? '如果时间紧，也可以先调构建，但同类问题下一轮评测时仍可能漏掉。' : '如果怀疑评测集覆盖不全，回到第 5 阶段补样本。' }]
+    };
+  }
+
+  root.AI = AI;
+})(window);
+
+// 数据存储：浏览器 localStorage。单人使用，不需要后端数据库。
+(function (root) {
+  const { STAGES } = root.Stages;
+  const KEY = 'ai-pm-workbench-v1';
+
+  const uid = () => Math.random().toString(36).slice(2, 10);
+  const now = () => new Date().toISOString();
+
+  function makeStep(title, status) {
+    return { id: uid(), title, status: status || 'todo', risk: '', note: '', output: '' };
+  }
+
+  function makeProject({ name, docText, analysis, stepsByStage }) {
+    const stages = {};
+    STAGES.forEach(s => {
+      stages[s.n] = {
+        steps: (stepsByStage[s.n] || []).map(t => makeStep(t)),
+        fields: {},
+        gatePassed: false,
+        fromDoc: analysis && s.n < analysis.stageGuess
+      };
+    });
+    const start = analysis ? analysis.stageGuess : 1;
+    return root.Engine.ensure({
+      id: uid(), name, createdAt: now(), iteration: 1,
+      currentStage: start, risk: false,
+      doc: { text: docText, type: analysis && analysis.docType, reason: analysis && analysis.reason, missing: analysis ? analysis.missing : [] },
+      stages,
+      log: [{
+        id: uid(), t: now(), stage: start, stageName: '创建项目', type: 'create',
+        decision: `创建项目，识别为${analysis ? analysis.docType : '未识别'}，从第 ${start} 阶段开始`,
+        reason: '', rule: '', ai: analysis ? analysis.reason : ''
+      }]
+    });
+  }
+
+  // ---------- 示例项目：线索培育 Agent（数据均为示例值） ----------
+  function demoProject() {
+    const doc = `目前私域培育群约 5 万人，成交转化率只有约 0.8%，每月大约 400 单。群里其实有不少人在问课程、说自己的问题，但运营人员看不过来，很多有意向的人没被及时跟进。希望用 AI 识别群里的意向信号，把有意向的人及时转给销售，提高培育群的成交转化。`;
+    const steps = {
+      1: ['梳理培育群现状数据（人数、转化率、月成交）', '确定业务目标', '列出不可接受的结果', '确认预算与时间'],
+      2: ['评估模型能否识别群聊里的意向信号', '确认群聊记录能否获取', '评估隐私与合规风险', '估算建设与运行成本', '给出可行性结论'],
+      3: ['确定北极星指标：培育群成交转化率', '定义离线评测指标：漏检率、Agent 动作准确率', '定义护栏指标：转出候选成交率、销售侧无效工单率', '与业务负责人确认标准'],
+      4: ['定义识别信号：明确咨询、直接指向课程的痛点需求', '设计双门槛转接与分配规则', '设计 Agent 边界与五类出口（终止、短路直推、产单、挂起观察、降级转人工）', '设计 RAG 口径库方案', '撰写 PRD 并组织评审'],
+      5: ['抽取培育群历史聊天样本', '标注信号识别评测集', '标注 Agent 动作评测集', '评测集定稿'],
+      6: ['搭建信号识别 Prompt', '整理 RAG 口径库', '配置 Agent 出口规则', '完成自测'],
+      7: ['运行离线评测', '分析错误样例', '上传评测结果'],
+      8: STAGES[7].steps, 9: STAGES[8].steps, 10: STAGES[9].steps
+    };
+    const p = makeProject({
+      name: '线索培育 Agent（示例）', docText: doc,
+      analysis: { docType: '需求描述', reason: '只有问题和大方向，没有成本收益论证，也没有功能方案。', stageGuess: 1, missing: ['目标值没写清：提升到多少算成功？', '预算和成本没有提到', '没有提到隐私、合规等风险'] },
+      stepsByStage: steps
+    });
+    p.demo = true;
+    p.currentStage = 7;
+    for (let n = 1; n <= 6; n++) {
+      p.stages[n].steps.forEach(s => { s.status = 'done'; });
+      p.stages[n].fromDoc = false;
+    }
+    p.stages[7].steps[0].status = 'done';
+    p.stages[7].steps[1].status = 'done';
+    p.stages[7].steps[2].status = 'done';
+
+    const F = (n, o) => Object.assign(p.stages[n].fields, o);
+    F(1, { goal: '提升私域培育群的成交转化率（示例值：从约 0.8% 提升到 1.1% 以上）', unacceptable: '把无意向用户大量推给销售，造成销售侧无效工单激增；Agent 回复和课程口径不一致', budget: '示例值：建设约 30 万，月运行约 5 万' });
+    F(2, { feasibility: '有条件可行', cost: '示例值：建设约 30 万，月运行约 5 万。条件：群聊记录需在用户授权范围内使用' });
+    F(3, {
+      metrics: [
+        { id: 'm1', name: '培育群成交转化率', role: '北极星', op: '>=', threshold: 1.1, unit: '%' },
+        { id: 'm2', name: '漏检率', role: '评测', op: '<=', threshold: 15, unit: '%' },
+        { id: 'm3', name: 'Agent 动作准确率', role: '评测', op: '>=', threshold: 85, unit: '%' },
+        { id: 'm4', name: '转出候选成交率', role: '护栏', op: '>=', threshold: 20, unit: '%' },
+        { id: 'm5', name: '销售侧无效工单率', role: '护栏', op: '<=', threshold: 10, unit: '%' }
+      ],
+      minGraySample: 1000
+    });
+    F(4, { prd: '培育群语义信号识别 + Agent 双门槛转接 + RAG 口径库。只识别两类信号：明确咨询、直接指向课程的痛点需求。Agent 设五类出口：终止、短路直推、产单、挂起观察、降级转人工。', review: '通过', issues: '' });
+    F(5, { evalset: '示例值：信号识别评测集约 250 条（其中有意向样本 115 条：明确咨询 55、痛点需求 60），Agent 动作评测集约 150 条，均来自历史群聊并人工标注', evalSize: 250 });
+    F(6, { build: '信号识别 Prompt v3；RAG 口径库约 2000 条；五类出口规则已配置' });
+    F(7, {
+      evalResults: { m2: 22, m3: 88 },
+      errors: '【分类型统计，示例值】有意向样本 115 条，漏检 25 条（约 22%）：痛点需求类 60 条中漏检 19 条（约 32%），明确咨询类 55 条中漏检 6 条（约 11%）\n「孩子数学一直上不去，愁死了」—— 痛点需求，未识别\n「我家这个一考试就紧张，有没有办法」—— 痛点需求，未识别\n「最近孩子作业拖拉得厉害」—— 痛点需求，未识别\n「这课是不是只适合小学生」—— 明确咨询，已识别（对照）'
+    });
+    [2, 3, 4].forEach(n => { p.stages[n].gatePassed = true; });
+    p.stages[7].fields.evalMeta = { std: 1, evalset: 1, build: 1, at: new Date(Date.UTC(2025, 8, 20, 6)).toISOString() };
+    p.metricHistory = [{ t: new Date(Date.UTC(2025, 8, 20, 6)).toISOString(), stage: 7, iteration: 1, ver: { std: 1, evalset: 1, build: 1 }, values: { m2: 22, m3: 88 } }];
+
+    const d = (day, h) => new Date(Date.UTC(2025, 7, day, h)).toISOString();
+    p.log = [
+      { id: uid(), t: d(4, 2), stage: 1, stageName: '创建项目', type: 'create', decision: '创建项目，识别为需求描述，从第 1 阶段开始', reason: '', rule: '', ai: '' },
+      { id: uid(), t: d(11, 6), stage: 2, stageName: '是否立项', type: 'gate', decision: '采纳建议：进入第 3 阶段', reason: '', approver: '业务负责人（示例）', opinion: '同意立项，群聊数据须在授权范围内使用', rule: '6/6 项通过', ai: '可以立项，但要把"条件"写进第 3 阶段的验收标准。' },
+      { id: uid(), t: d(15, 7), stage: 3, stageName: '标准确认', type: 'gate', decision: '采纳建议：进入第 4 阶段', reason: '', approver: '业务负责人（示例）', opinion: '标准确认', rule: '5/5 项通过', ai: '规则全部满足。' },
+      { id: uid(), t: d(25, 8), stage: 4, stageName: '评审通过', type: 'gate', decision: '采纳建议：进入第 5 阶段', reason: '', approver: '评审会（示例）', opinion: '', rule: '2/2 项通过', ai: '评审已通过，评测集与构建可并行。' }
+    ];
+    p.createdAt = d(4, 2);
+    return p;
+  }
+
+  const Store = {
+    state: { projects: [], activeId: null },
+    load() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (raw) this.state = JSON.parse(raw);
+      } catch (e) { this.loadFailed = true; }
+      (this.state.projects || []).forEach(p => root.Engine.ensure(p));
+      if (!this.state.projects || this.state.projects.length === 0) {
+        const p = demoProject();
+        this.state = { projects: [p], activeId: p.id };
+      }
+    },
+    save() {
+      try { localStorage.setItem(KEY, JSON.stringify(this.state)); this.saveFailed = false; }
+      catch (e) {
+        if (!this.saveFailed && this.onError) this.onError('保存失败：浏览器存储空间不足或不可用，刚才的修改只在本次页面里有效。请导出项目备份。');
+        this.saveFailed = true;
+      }
+    },
+    active() { return this.state.projects.find(p => p.id === this.state.activeId) || null; },
+    add(p) { this.state.projects.unshift(p); this.state.activeId = p.id; this.save(); },
+    remove(id) {
+      this.state.projects = this.state.projects.filter(p => p.id !== id);
+      this.state.activeId = this.state.projects[0] ? this.state.projects[0].id : null;
+      this.save();
+    },
+    resetDemo() {
+      const p = demoProject();
+      this.state.projects = this.state.projects.filter(x => !x.demo);
+      this.state.projects.unshift(p);
+      this.state.activeId = p.id;
+      this.save();
+    },
+    log(p, entry) { p.log.push({ id: uid(), t: now(), ...entry }); },
+    uid, makeStep, makeProject, demoProject
+  };
+
+  root.Store = Store;
+})(window);
+
+// 多文件解析：一次上传多个文件，统一转成纯文本。
+// 文本类直接读取；Word 用 mammoth，PDF 用 pdf.js，都在第一次用到时才从 CDN 加载。
+(function (root) {
+  const TEXT_EXT = ['md', 'markdown', 'txt', 'csv', 'tsv', 'json', 'html', 'htm', 'yaml', 'yml'];
+  const ACCEPT = [...TEXT_EXT, 'docx', 'pdf'].map(e => '.' + e).join(',');
+  const MAX_CHARS = 20000; // 单个文件送给 AI 的最大字数
+
+  const MAMMOTH = 'https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js';
+  const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+  const PDF_WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  const PDF_CMAPS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/'; // 中文 PDF 常用的字符映射表
+
+  const loaded = {};
+  function loadScript(src) {
+    if (!loaded[src]) {
+      loaded[src] = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        const timer = setTimeout(() => { delete loaded[src]; reject(new Error('解析组件加载超时（需要联网）。可以改传 Markdown 或 TXT，或把内容粘贴到补充说明')); }, 15000);
+        s.src = src; s.onload = () => { clearTimeout(timer); resolve(); };
+        s.onerror = () => { clearTimeout(timer); delete loaded[src]; reject(new Error('解析组件加载失败（需要联网）。可以改传 Markdown 或 TXT，或把内容粘贴到补充说明')); };
+        document.head.appendChild(s);
+      });
+    }
+    return loaded[src];
+  }
+
+  const ext = name => (name.split('.').pop() || '').toLowerCase();
+  const readText = f => f.text();
+
+  async function readDocx(f) {
+    await loadScript(MAMMOTH);
+    const r = await root.mammoth.extractRawText({ arrayBuffer: await f.arrayBuffer() });
+    return r.value;
+  }
+
+  async function readPdf(f) {
+    await loadScript(PDFJS);
+    const lib = root.pdfjsLib;
+    lib.GlobalWorkerOptions.workerSrc = PDF_WORKER;
+    const pdf = await lib.getDocument({ data: new Uint8Array(await f.arrayBuffer()), cMapUrl: PDF_CMAPS, cMapPacked: true, verbosity: 0 }).promise;
+    const pages = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const c = await (await pdf.getPage(i)).getTextContent();
+      pages.push(c.items.map(it => it.str + (it.hasEOL ? '\n' : '')).join(''));
+    }
+    return pages.join('\n');
+  }
+
+  // 返回 [{name, text, ok, error, truncated}]
+  async function parseFiles(fileList) {
+    const out = [];
+    for (const f of Array.from(fileList)) {
+      const e = ext(f.name);
+      try {
+        let text;
+        if (TEXT_EXT.includes(e)) text = await readText(f);
+        else if (e === 'docx') text = await readDocx(f);
+        else if (e === 'pdf') text = await readPdf(f);
+        else throw new Error('暂不支持这种格式');
+        text = (text || '').replace(/\r\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+        if (!text) throw new Error('没有读到文字内容（可能是扫描件或图片）');
+        const truncated = text.length > MAX_CHARS;
+        out.push({ name: f.name, text: truncated ? text.slice(0, MAX_CHARS) : text, ok: true, truncated, chars: text.length });
+      } catch (err) {
+        out.push({ name: f.name, text: '', ok: false, error: err.message });
+      }
+    }
+    return out;
+  }
+
+  root.Files = { parseFiles, ACCEPT, TEXT_EXT };
+})(window);
+
+(function () {
+  const { STAGES, ROLES, stageByN } = window.Stages;
+  const { Rules, AI, Store, Engine } = window;
+
+  const ui = {
+    view: 'project',      // project | create
+    viewStage: null,      // 正在查看的阶段
+    session: null,        // 决策台会话 {kind, stage, rules, advice, loading}
+    draft: null           // 新建项目草稿
+  };
+
+  const $ = sel => document.querySelector(sel);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const timeStr = t => new Date(t).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const STATUS = { todo: '未开始', doing: '进行中', done: '已完成', skipped: '跳过' };
+  const DECISION_TYPES = ['create', 'gate', 'force', 'next', 'backflow', 'advance', 'adjust', 'mark', 'version', 'close'];
+  const LOG_GROUPS = [
+    { key: 'all', label: '全部' },
+    { key: 'decision', label: '决策', types: ['create', 'gate', 'force', 'next', 'backflow', 'advance', 'close'] },
+    { key: 'version', label: '依据变更', types: ['version'] },
+    { key: 'step', label: '步骤', types: ['status', 'adjust', 'mark'] },
+    { key: 'edit', label: '产出修改', types: ['edit'] },
+    { key: 'material', label: '材料', types: ['material'] },
+    { key: 'note', label: '手动记录', types: ['note'] }
+  ];
+  const groupOf = t => (LOG_GROUPS.find(g => g.types && g.types.includes(t)) || { label: '其他' }).label;
+  const fullTime = t => new Date(t).toLocaleString('zh-CN', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  // 产出修改：同一字段 5 分钟内的连续修改合并成一条，保留最初的旧值和最新的新值
+  const full = v => typeof v === 'object' && v !== null ? JSON.stringify(v) : String(v == null || v === '' ? '（空）' : v);
+  const brief = full; // 存储保留全文，显示时再折叠
+  function longText(t) {
+    t = String(t == null ? '' : t);
+    return t.length > 80 ? `${esc(t.slice(0, 80))}…<details class="more"><summary>展开全文</summary><pre class="doc">${esc(t)}</pre></details>` : esc(t);
+  }
+  function logEdit(p, n, key, text, before, after) {
+    const last = p.log[p.log.length - 1];
+    if (last && last.type === 'edit' && last.editKey === `${n}:${key}` && Date.now() - new Date(last.t).getTime() < 5 * 60 * 1000) {
+      last.decision = text; last.t = new Date().toISOString();
+      if (after !== undefined) last.after = brief(after);
+      return;
+    }
+    Store.log(p, { stage: n, stageName: stageByN(n).name, type: 'edit', editKey: `${n}:${key}`, decision: text, reason: '', rule: '', ai: '',
+      ...(before !== undefined || after !== undefined ? { before: brief(before), after: brief(after) } : {}) });
+  }
+
+  function openLog(filter) {
+    const p = Store.active(); ui.logFilter = filter || ui.logFilter || 'all';
+    const g = LOG_GROUPS.find(x => x.key === ui.logFilter);
+    const list = p.log.filter(l => !g.types || g.types.includes(l.type)).slice().reverse();
+    const dlg = $('#dialog');
+    dlg.innerHTML = `<div class="dlg wide logdlg">
+      <div class="card-head"><h3>项目日志：${esc(p.name)}</h3><button class="icon" data-act="closeDlg" aria-label="关闭">×</button></div>
+      <form class="lognote" data-form="note">
+        <textarea name="note" rows="2" placeholder="写一条手动记录，例如：和算法对齐了漏检率阈值，下周一复评"></textarea>
+        <button class="btn primary">记一笔</button>
+      </form>
+      <div class="filters">${LOG_GROUPS.map(x => `<button class="filter ${x.key === ui.logFilter ? 'on' : ''}" data-act="logFilter" data-k="${x.key}">${x.label}<small>${x.types ? p.log.filter(l => x.types.includes(l.type)).length : p.log.length}</small></button>`).join('')}</div>
+      <ol class="timeline">${list.map(l => `
+        <li class="tl-${l.type}">
+          <div class="tl-meta"><time>${fullTime(l.t)}</time><span class="tag">${groupOf(l.type)}</span><span>第 ${l.stage} 阶段</span></div>
+          <p>${l.type === 'note' ? '' : `<b>${esc(l.stageName)}</b>`}${esc(l.decision)}</p>
+          ${l.rule ? `<p class="log-sub">规则：${esc(l.rule)}</p>` : ''}
+          ${l.ai ? `<p class="log-sub">AI：${esc(l.ai)}</p>` : ''}
+          ${l.approver ? `<p class="log-approver">批准人：${esc(l.approver)}${l.opinion ? `　意见：${esc(l.opinion)}` : ''}</p>` : ''}
+          ${l.before !== undefined ? `<div class="log-sub">修改前：${longText(l.before)}<br>修改后：${longText(l.after)}</div>` : ''}
+          ${l.reason ? `<p class="log-reason">原因：${esc(l.reason)}</p>` : ''}
+          ${l.snapshot ? `<button class="link snap-link" data-act="viewSnap" data-id="${esc(l.id)}">查看当时依据</button>` : ''}
+        </li>`).join('') || '<li class="empty">这个分类下还没有记录。</li>'}</ol>
+    </div>`;
+    if (!dlg.open) { dlg.onclose = null; dlg.showModal(); }
+  }
+
+  // ---------- 原因弹窗 ----------
+  function ask(title, desc, opts = {}) {
+    return new Promise(resolve => {
+      const dlg = $('#dialog');
+      dlg.innerHTML = `
+        <form method="dialog" class="dlg">
+          <h3>${esc(title)}</h3>
+          ${desc ? `<p class="dlg-desc">${esc(desc)}</p>` : ''}
+          ${opts.select ? `<label class="fld"><span>${esc(opts.selectLabel || '选择')}</span><select id="dlgSelect">${opts.select.map(o => `<option value="${esc(o.value)}">${esc(o.label)}</option>`).join('')}</select></label>` : ''}
+          ${opts.input ? `<label class="fld"><span>${esc(opts.input.label)}</span><input id="dlgInput" value="${esc(opts.input.value || '')}" placeholder="${esc(opts.input.placeholder || '')}"></label>` : ''}
+          <label class="fld"><span>${esc(opts.label || '原因')}</span>
+            <textarea id="dlgText" rows="3" placeholder="${esc(opts.placeholder || '写清楚为什么，这条会进入决策记录')}"></textarea></label>
+          <p class="dlg-err" id="dlgErr"></p>
+          <div class="dlg-actions">
+            <button value="cancel" class="btn ghost">取消</button>
+            <button value="ok" class="btn primary" id="dlgOk">${esc(opts.ok || '确认')}</button>
+          </div>
+        </form>`;
+      const done = v => { dlg.close(); resolve(v); };
+      $('#dlgOk').onclick = e => {
+        e.preventDefault();
+        const text = $('#dlgText').value.trim();
+        const input = opts.input ? $('#dlgInput').value.trim() : null;
+        if (opts.input && opts.input.required && !input) { $('#dlgErr').textContent = `请填写${opts.input.label}。`; $('#dlgInput').focus(); return; }
+        if (!text && !opts.optional) { $('#dlgErr').textContent = `请填写${opts.label || '原因'}。`; return; }
+        done({ text, select: opts.select ? $('#dlgSelect').value : null, input });
+      };
+      dlg.onclose = null;
+      setTimeout(() => { dlg.onclose = () => resolve(null); }, 0); // 避开上一个弹窗关闭时排队的 close 事件
+      dlg.querySelector('[value=cancel]').onclick = e => { e.preventDefault(); done(null); };
+      dlg.showModal();
+      setTimeout(() => { const i = $('#dlgInput'); (i && !i.value ? i : $('#dlgText')).focus(); }, 30);
+    });
+  }
+
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  // ---------- 渲染 ----------
+  function render() {
+    renderTopbar();
+    const p = Store.active();
+    $('#main').className = 'main' + (ui.view === 'create' || !p ? '' : ' shell');
+    if (ui.view === 'create' || !p) { renderCreate(); return; }
+    if (ui.viewStage == null) ui.viewStage = p.currentStage;
+    $('#main').innerHTML = `
+      <header id="header"></header>
+      <div id="materials"></div>
+      <div class="work">
+        <nav id="track" aria-label="项目阶段"></nav>
+        <section id="stagePanel" class="stage-panel"></section>
+        <aside id="desk" class="desk"></aside>
+      </div>`;
+    renderHeader(p); renderTrack(p); renderStage(p); renderDesk(p); renderMaterials(p);
+  }
+
+  function renderTopbar() {
+    const s = Store.state;
+    setTimeout(() => { const f = $('#importFile'); if (f) f.onchange = e => { if (e.target.files[0]) importProject(e.target.files[0]); e.target.value = ''; }; });
+    $('#topbar').innerHTML = `
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></div>
+        <strong>AI 产品工作台</strong>
+      </div>
+      ${s.projects.length ? `<label class="switch"><span class="sr">切换项目</span>
+        <select id="projSel">${s.projects.map(p => `<option value="${esc(p.id)}" ${p.id === s.activeId && ui.view !== 'create' ? 'selected' : ''}>${esc(p.name)}（第 ${p.currentStage}/10 阶段${p.risk ? '，有风险' : ''}）</option>`).join('')}
+        ${ui.view === 'create' ? '<option selected disabled>正在新建项目</option>' : ''}</select></label>` : ''}
+      <button class="btn primary" data-act="new">新建项目</button>
+      <span class="grow"></span>
+      <label class="link import-link" title="导入之前导出的项目 JSON">导入项目<input type="file" id="importFile" accept=".json,application/json" hidden></label>
+      <span class="mode" title="${AI.available ? '' : '没有配置模型，建议由内置规则模板生成'}">
+        <span class="mode-dot ${AI.mode}"></span>${AI.mode === 'model' ? `AI：${esc(AI.modelName || '已接入模型')}` : 'AI：演示模式'}
+        ${AI.available ? `<button class="link" data-act="toggleMode">${AI.mode === 'model' ? '切到演示' : '切回模型'}</button>` : ''}
+      </span>
+      <button class="link" data-act="resetDemo">重置示例项目</button>`;
+  }
+
+  // 导入：先完整校验并规范化成新对象，全部通过后才写入；失败不改变已有数据
+  function normalizeImport(d) {
+    const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
+    const str = (v, dflt = '') => typeof v === 'string' ? v : dflt;
+    if (!isObj(d)) throw new Error('不是有效的项目文件');
+    if (!str(d.name).trim()) throw new Error('缺少项目名称');
+    if (!isObj(d.stages)) throw new Error('缺少阶段数据');
+    const cur = Number(d.currentStage);
+    if (!Number.isInteger(cur) || cur < 1 || cur > 10) throw new Error('当前阶段必须是 1 到 10');
+    const stages = {};
+    STAGES.forEach(s => {
+      const st = d.stages[s.n];
+      if (!isObj(st)) throw new Error(`缺少第 ${s.n} 阶段`);
+      if (!Array.isArray(st.steps)) throw new Error(`第 ${s.n} 阶段的步骤不是列表`);
+      stages[s.n] = {
+        steps: st.steps.map(x => {
+          if (!isObj(x) || !str(x.title).trim()) throw new Error(`第 ${s.n} 阶段有无效步骤`);
+          return { id: Store.uid(), title: x.title, status: ['todo', 'doing', 'done', 'skipped'].includes(x.status) ? x.status : 'todo', risk: str(x.risk), note: str(x.note), output: str(x.output) };
+        }),
+        fields: isObj(st.fields) ? JSON.parse(JSON.stringify(st.fields)) : {},
+        gatePassed: !!st.gatePassed, forced: !!st.forced, lastGate: null, fromDoc: !!st.fromDoc,
+        evidence: Array.isArray(st.evidence) ? st.evidence.filter(isObj).map(e => ({ id: str(e.id), name: str(e.name), type: str(e.type, '未识别') })) : []
+      };
+    });
+    const m = stages[3].fields.metrics;
+    if (m !== undefined) {
+      if (!Array.isArray(m)) throw new Error('指标不是列表');
+      stages[3].fields.metrics = m.filter(isObj).map(x => ({ id: /^[\w-]{1,40}$/.test(x.id) ? x.id : Store.uid(), name: str(x.name), role: ['北极星', '评测', '护栏'].includes(x.role) ? x.role : '评测', op: x.op === '<=' ? '<=' : '>=', threshold: x.threshold === '' || x.threshold == null ? '' : Number(x.threshold), unit: str(x.unit) }));
+    }
+    const ver = isObj(d.ver) ? d.ver : {};
+    const vi = v => Number.isInteger(Number(v)) && Number(v) > 0 ? Number(v) : 1;
+    const doc = isObj(d.doc) ? d.doc : {};
+    const p = {
+      id: Store.uid(), name: d.name.trim(), createdAt: str(d.createdAt, new Date().toISOString()),
+      iteration: vi(d.iteration), currentStage: cur, risk: !!d.risk,
+      status: ['active', 'closed', 'terminated'].includes(d.status) ? d.status : 'active', statusReason: str(d.statusReason),
+      ver: { std: vi(ver.std), evalset: vi(ver.evalset), build: vi(ver.build) },
+      doc: { text: str(doc.text), type: str(doc.type), reason: str(doc.reason), missing: Array.isArray(doc.missing) ? doc.missing.map(String) : [],
+        files: Array.isArray(doc.files) ? doc.files.filter(isObj).map(f => ({ ...f, id: str(f.id) || undefined, name: str(f.name, '未命名材料'), type: str(f.type, '未识别'), text: str(f.text) })) : [] },
+      stages,
+      log: (Array.isArray(d.log) ? d.log : []).filter(isObj).map(l => ({ ...l, id: Store.uid(), stageName: str(l.stageName), decision: str(l.decision), reason: str(l.reason), rule: str(l.rule), ai: str(l.ai), type: str(l.type, 'note') }))
+    };
+    return Engine.ensure(p);
+  }
+
+  async function importProject(file) {
+    let p;
+    try { p = normalizeImport(JSON.parse(await file.text())); }
+    catch (err) { toast(`导入失败：${err.message}`); return; }
+    if (Store.state.projects.some(x => x.name === p.name)) p.name += '（导入）';
+    Store.log(p, { stage: p.currentStage, stageName: '导入项目', type: 'note', decision: `从文件「${file.name}」导入`, reason: '', rule: '', ai: '' });
+    Store.add(p); ui.view = 'project'; ui.viewStage = null; ui.session = null; render(); toast('项目已导入');
+  }
+
+  // ---------- 导出：决策报告（给人看）与项目备份（给程序读） ----------
+  const REPORT_TYPES = ['gate', 'force', 'next', 'backflow', 'advance', 'close'];
+  const mdEsc = t => String(t == null ? '' : t).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+  const GATE_STATE = (p, s) => { const st = p.stages[s.n]; if (st.gatePassed) return st.forced ? '强制放行' : '已通过'; if (s.n < p.currentStage) return '无效（未确认或依据变化后失效）'; return st.lastGate === 'fail' ? '未通过' : '尚未到达'; };
+
+  function decisionMd(p, l) {
+    const sn = l.snapshot, out = [];
+    out.push(`### ${fullTime(l.t)}　第 ${l.stage} 阶段「${l.stageName}」`, '');
+    out.push(`**决定**：${l.decision}`, '');
+    if (l.approver) out.push(`**批准人**：${l.approver}${l.opinion ? `　**批准意见**：${l.opinion}` : ''}`, '');
+    if (l.reason) out.push(`**原因**：${l.reason}`, '');
+    if (!sn) {
+      if (l.rule) out.push(`**规则检查**：${l.rule}`, '');
+      if (l.ai) out.push(`**AI 建议**：${l.ai}`, '');
+      out.push('*这条记录没有保存完整依据快照。*', '');
+    }
+    if (sn) {
+      out.push(`**当时依据**：${Rules.verText(sn.ver, 7)}`, '');
+      if (sn.rules.length) {
+        out.push('**规则检查**', '', ...sn.rules.map(r => `- ${r.pass ? '✓' : '✕'} ${r.label}${r.detail ? `（${r.detail}）` : ''}`), '');
+      }
+      const ms = sn.metrics.filter(m => m.actual !== undefined && m.actual !== '' && m.actual !== null);
+      if (ms.length) {
+        out.push('**指标实测**', '', '| 指标 | 类型 | 标准 | 实测 | 结果 |', '|---|---|---|---|---|');
+        ms.forEach(m => { const ok = Rules.meets(m, m.actual); out.push(`| ${mdEsc(m.name)} | ${m.role} | ${m.op === '<=' ? '≤' : '≥'} ${m.threshold}${m.unit} | ${m.actual}${m.unit} | ${ok === null ? '格式无效' : ok ? '达标' : '未达标'} |`); });
+        out.push('');
+      }
+      if (sn.evidence && sn.evidence.length) out.push(`**依据材料**：${sn.evidence.map(e => `${e.name}（${e.type}）`).join('、')}`, '');
+      const a = sn.advice;
+      if (a) {
+        out.push(`**AI 建议**（${a.preset ? '预设演示建议' : a.source === 'model' ? '模型生成' : '规则模板生成'}）：${a.summary}`, '');
+        if (a.reason) out.push(`> ${a.reason}`, '');
+        if (a.alternatives && a.alternatives.length) out.push('备选路线：', '', ...a.alternatives.map(x => `- 第 ${x.stage} 阶段：${x.desc}`), '');
+      }
+    }
+    return out.join('\n');
+  }
+
+  function buildReport(p, onlyId) {
+    const decisions = p.log.filter(l => onlyId ? l.id === onlyId : REPORT_TYPES.includes(l.type));
+    const forced = p.log.filter(l => l.type === 'force');
+    const revoked = p.log.filter(l => l.type === 'version');
+    const lines = [];
+    lines.push(`# 决策报告：${p.name}`, '');
+    lines.push(`生成时间：${fullTime(new Date().toISOString())}`, '');
+    if (p.demo) lines.push('> 示例项目，报告中的数字均为示例值。', '');
+    if (!onlyId) {
+      lines.push('## 项目概况', '');
+      lines.push(`- 当前阶段：第 ${p.currentStage} 阶段「${stageByN(p.currentStage).name}」，第 ${p.iteration} 轮`);
+      lines.push(`- 项目状态：${{ active: '进行中', closed: '已结束', terminated: '已终止' }[p.status]}${p.statusReason ? `（${p.statusReason}）` : ''}`);
+      lines.push(`- 风险标记：${p.risk ? '有（存在强制放行）' : '无'}`);
+      lines.push(`- 当前依据：${Rules.verText(p.ver, 7)}`, '');
+      lines.push('## 关卡状态', '', '| 关卡 | 状态 |', '|---|---|');
+      STAGES.filter(s => s.key).forEach(s => lines.push(`| 第 ${s.n} 关：${s.gate} | ${GATE_STATE(p, s)} |`));
+      lines.push('');
+      const ms = p.stages[3].fields.metrics || [];
+      if (ms.length) {
+        lines.push('## 验收标准', '', '| 指标 | 类型 | 标准 |', '|---|---|---|');
+        ms.forEach(m => lines.push(`| ${mdEsc(m.name)} | ${m.role} | ${m.op === '<=' ? '≤' : '≥'} ${m.threshold}${m.unit || ''} |`));
+        lines.push('');
+      }
+      const hist = p.metricHistory || [];
+      const trendRows = ms.filter(m => m.role !== '北极星').map(m => {
+        const n = m.role === '评测' ? 7 : 8;
+        const vals = hist.filter(h => h.stage === n && h.values[m.id] !== undefined).map(h => `${h.values[m.id]}${m.unit || ''}`);
+        return vals.length ? `| ${mdEsc(m.name)} | ${m.op === '<=' ? '≤' : '≥'} ${m.threshold}${m.unit || ''} | ${vals.join(' → ')} |` : null;
+      }).filter(Boolean);
+      if (trendRows.length) lines.push('## 指标趋势（历次关卡检查）', '', '| 指标 | 标准 | 历次结果 |', '|---|---|---|', ...trendRows, '');
+      if (forced.length || revoked.length) {
+        lines.push('## 风险、例外与依据变更', '');
+        forced.forEach(l => lines.push(`- ${fullTime(l.t)} 强制放行第 ${l.stage} 关：${l.reason || '（未写原因）'}${l.approver ? `（批准人：${l.approver}）` : ''}`));
+        revoked.forEach(l => lines.push(`- ${fullTime(l.t)} ${l.decision}`));
+        lines.push('');
+      }
+      lines.push(`## 关键决策（${decisions.length} 次，按时间顺序）`, '');
+    }
+    if (!decisions.length) lines.push('还没有关键决策记录。', '');
+    decisions.forEach(l => lines.push(decisionMd(p, l), '---', ''));
+    lines.push('*由「AI 产品工作台」生成。规则检查只说明数据是否满足事先约定的标准，数据本身由产品经理录入。*');
+    return lines.join('\n');
+  }
+
+  function download(name, text, type) {
+    const blob = new Blob([text], { type });
+    const url = URL.createObjectURL(blob);
+    const el = document.createElement('a'); el.href = url; el.download = name; document.body.appendChild(el); el.click(); el.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  const safeName = n => String(n).replace(/[\\/:*?"<>|]/g, '_');
+
+  function openExport() {
+    const p = Store.active();
+    const n = p.log.filter(l => REPORT_TYPES.includes(l.type)).length;
+    const dlg = $('#dialog');
+    dlg.innerHTML = `<div class="dlg wide">
+      <div class="card-head"><h3>导出</h3><button class="icon" data-act="closeDlg" aria-label="关闭">×</button></div>
+      <div class="export-opts">
+        <button class="export-opt" data-act="exportReport">
+          <b>决策报告</b><span>Markdown 文件，给人看。包含项目概况、关卡状态、验收标准、风险与例外，以及 ${n} 次关键决策的依据（规则、实测、AI 建议、你的选择和原因）。可以直接发给业务方或贴进文档。</span>
+        </button>
+        <button class="export-opt" data-act="exportProj">
+          <b>项目备份</b><span>JSON 文件，给程序读。包含项目的全部数据，用于换电脑或清缓存后通过「导入项目」恢复。</span>
+        </button>
+      </div>
+      <p class="hint">只想导出某一次决定：在决策记录里点「查看当时依据」，弹窗底部有「导出这次决定」。</p>
+    </div>`;
+    if (!dlg.open) { dlg.onclose = null; dlg.showModal(); }
+  }
+
+  // ---------- 底部：补充材料 ----------
+  function materialList(p) {
+    if (p.doc.files && p.doc.files.length) return p.doc.files;
+    return [{ name: '来源文档', type: p.doc.type, text: p.doc.text }];
+  }
+
+  // 只在材料显示的进度和当前阶段不一致等需要注意时，才在标题下方显示一条提醒
+  function renderMaterials(p) {
+    const m = ui.material && ui.material.pid === p.id ? ui.material : null;
+    $('#materials').innerHTML = m && m.notice ? `<p class="notice mat-notice">${esc(m.notice)}<button class="link" data-act="closeNotice">知道了</button></p>` : '';
+    const inp = $('#matFile');
+    if (inp) inp.onchange = e => { addMaterials(p, e.target.files); e.target.value = ''; };
+  }
+
+  const whenText = f => f.addedAt ? `第 ${f.addedStage} 阶段${f.addedStageName ? `（${f.addedStageName}）` : ''}时补充` : '创建项目时上传';
+
+  function openLinkMat() {
+    const p = Store.active(), n = ui.viewStage, files = materialList(p);
+    const linked = new Set((p.stages[n].evidence || []).map(e => e.name));
+    const dlg = $('#dialog');
+    dlg.innerHTML = `<div class="dlg wide">
+      <div class="card-head"><h3>第 ${n} 阶段的依据材料</h3><button class="icon" data-act="closeDlg" aria-label="关闭">×</button></div>
+      <p class="dlg-desc">勾选能证明这一阶段产出的材料。关联后会写进决策依据；第 4 关关联了 PRD 类材料，也视为 PRD 已记录。</p>
+      <ul class="link-list">${files.map((f, i) => `<li><label><input type="checkbox" data-link="${i}" ${linked.has(f.name) ? 'checked' : ''}><span class="tag">${esc(f.type || '未识别')}</span>${esc(f.name)}<small>${esc(whenText(f))}</small></label></li>`).join('')}</ul>
+      <div class="dlg-actions"><button class="btn ghost" data-act="closeDlg">取消</button><button class="btn primary" data-act="saveLinks">保存</button></div>
+    </div>`;
+    if (!dlg.open) { dlg.onclose = null; dlg.showModal(); }
+  }
+
+  function openMats() {
+    const p = Store.active(), files = materialList(p);
+    const groups = [];
+    files.forEach((f, i) => {
+      const key = whenText(f);
+      let g = groups.find(x => x.key === key);
+      if (!g) groups.push(g = { key, items: [] });
+      g.items.push({ ...f, i });
+    });
+    const dlg = $('#dialog');
+    dlg.innerHTML = `<div class="dlg wide matdlg">
+      <div class="card-head"><h3>项目材料（${files.length} 份）</h3><button class="icon" data-act="closeDlg" aria-label="关闭">×</button></div>
+      ${groups.map(g => `<h4 class="mat-group">${esc(g.key)}</h4>
+        <ul class="mat-items">${g.items.map(f => `<li><details><summary><span class="tag">${esc(f.type || '未识别')}</span><span class="mi-name">${esc(f.name)}</span>${f.truncated ? `<small class="warn">已截断：原文 ${f.chars} 字，只保存前 20000 字</small>` : ''}${f.addedAt ? `<small>${fullTime(f.addedAt)}</small>` : ''}</summary><pre class="doc">${esc(f.text || '（没有保存原文）')}</pre></details></li>`).join('')}</ul>`).join('')}
+    </div>`;
+    dlg.onclose = null; dlg.showModal();
+  }
+
+  async function addMaterials(p, list) {
+    if (!list || !list.length) return;
+    ui.material = { pid: p.id, busy: true }; renderHeader(p); renderMaterials(p);
+    const parsed = await window.Files.parseFiles(list);
+    const ok = parsed.filter(f => f.ok);
+    const bad = parsed.filter(f => !f.ok);
+    if (!ok.length) { ui.material = { pid: p.id, notice: `没有读出内容：${bad.map(f => `${f.name}（${f.error}）`).join('；')}` }; if (Store.state.activeId === p.id && ui.view === 'project') { renderHeader(p); renderMaterials(p); } else toast('补充材料没有读出内容'); return; }
+    const a = await AI.analyze(ok.map(f => ({ name: f.name, text: f.text })));
+    const stillHere = () => Store.state.activeId === p.id && ui.view === 'project';
+    if (!p.doc.files || !p.doc.files.length) p.doc.files = [{ name: '来源文档', type: p.doc.type, text: p.doc.text }];
+    a.files.forEach(f => {
+      const src = ok.find(x => x.name === f.name) || {};
+      p.doc.files.push({ ...f, id: 'm' + Store.uid(), text: src.text || '', truncated: !!src.truncated, chars: src.chars, addedAt: new Date().toISOString(), addedStage: p.currentStage, addedStageName: stageByN(p.currentStage).name });
+    });
+    let notice = `已补充 ${ok.length} 份：${a.files.map(f => `${f.name}（${f.type}）`).join('、')}。`;
+    if (a.stageGuess > p.currentStage) notice += `新材料显示项目可能已经到了第 ${a.stageGuess} 阶段，而当前记录在第 ${p.currentStage} 阶段。是否推进由你决定，可以在右侧决策台操作。`;
+    if (bad.length) notice += ` 另有 ${bad.length} 份没有读出内容：${bad.map(f => f.name).join('、')}。`;
+    Store.log(p, { stage: p.currentStage, stageName: '补充材料', type: 'material', decision: `补充 ${ok.length} 份材料：${a.files.map(f => `${f.name}（${f.type}）`).join('、')}`, reason: '', rule: '', ai: a.stageGuess > p.currentStage ? `材料显示可能已到第 ${a.stageGuess} 阶段` : '' });
+    Store.save();
+    const needAttention = a.stageGuess > p.currentStage || bad.length;
+    ui.material = needAttention ? { pid: p.id, notice } : null;
+    if (stillHere()) { renderHeader(p); renderMaterials(p); renderDesk(p); }
+    if (!needAttention || !stillHere()) toast(`「${p.name}」已补充 ${ok.length} 份材料`);
+  }
+
+  function renderHeader(p) {
+    $('#header').innerHTML = `
+      <div class="h-main">
+        <h1>${esc(p.name)}</h1>
+        <p class="h-sub">
+                    <span>第 ${p.iteration} 轮</span>
+          ${p.risk ? '<span class="tag caution">有强制放行</span>' : ''}
+          ${p.demo ? '<span class="tag">示例数据，数字均为示例值</span>' : ''}
+        </p>
+      </div>
+      <div class="h-actions">
+        <button class="btn ghost" data-act="openMats">项目材料 <span class="count">${materialList(p).length}</span></button>
+        <button class="btn ghost" data-act="openLog">项目日志</button>
+        <label class="btn ghost">${ui.material && ui.material.busy && ui.material.pid === p.id ? '读取中…' : '补充材料'}<input type="file" id="matFile" multiple accept="${window.Files.ACCEPT}" hidden></label>
+        ${window.self === window.top ? '<button class="btn ghost" data-act="openExport">导出</button>' : ''}
+        <button class="btn ghost danger" data-act="delete">删除项目</button>
+      </div>`;
+    const inp = $('#matFile');
+    if (inp) inp.onchange = e => { addMaterials(p, e.target.files); e.target.value = ''; };
+  }
+
+  function lampState(p, s) {
+    const st = p.stages[s.n];
+    if (!s.key) return '';
+    if (st.gatePassed) return st.forced ? 'forced' : 'go';
+    if (st.lastGate === 'fail') return 'stop';
+    return 'idle';
+  }
+
+  function renderTrack(p) {
+    $('#track').innerHTML = `<ol class="rail">${STAGES.map(s => {
+      const st = p.stages[s.n];
+      const done = st.steps.filter(x => x.status === 'done' || x.status === 'skipped').length;
+      const cls = [s.n === p.currentStage ? 'current' : '', s.n < p.currentStage ? 'past' : '', s.n === ui.viewStage ? 'viewing' : '', s.key ? 'key' : ''].join(' ');
+      const lamp = lampState(p, s);
+      return `<li class="station ${cls}">
+        <button data-act="viewStage" data-n="${s.n}" aria-current="${s.n === p.currentStage ? 'step' : 'false'}">
+          <span class="node ${lamp}" aria-hidden="true">${s.n}</span>
+          <span class="st-name">${esc(s.name)}</span>
+          <span class="st-meta">${s.key ? esc(s.gate) + '，' : ''}${done}/${st.steps.length}${st.fromDoc ? '，未核验' : ''}</span>
+        </button></li>`;
+    }).join('')}</ol>`;
+  }
+
+  function renderStage(p) {
+    const n = ui.viewStage, s = stageByN(n), st = p.stages[n];
+    $('#stagePanel').innerHTML = `
+      <div class="sp-head">
+        <h2>第 ${n} 阶段　${esc(s.name)}</h2>
+        ${s.key ? `<span class="tag ${st.gatePassed ? (st.forced ? 'caution' : 'go') : ''}">关键节点：${esc(s.gate)}${st.gatePassed ? (st.forced ? '（强制放行）' : '（已通过）') : ''}</span>` : ''}
+        ${n !== p.currentStage ? `<span class="tag">当前在第 ${p.currentStage} 阶段</span>` : ''}
+      </div>
+      <p class="sp-desc">${esc(s.desc)}${s.parallelWith ? `　可与第 ${s.parallelWith} 阶段并行。` : ''}</p>
+      ${st.fromDoc ? `<p class="notice">这一阶段在当前工作阶段之前，创建项目时标记为「未核验」：系统不确定它的产出是否真的存在。请对照项目材料补全步骤和产出，再点「标记为已核验」。${s.key ? '核验只说明产出已对照材料，关卡还需要单独「检查并确认」。' : ''}<button class="link" data-act="verify">标记为已核验</button></p>` : ''}
+      ${s.key && n < p.currentStage && !st.gatePassed ? `<p class="notice">第 ${n} 关当前无效（未确认，或依据变化后已失效）。<button class="link" data-act="confirmGate" data-n="${n}">检查并确认第 ${n} 关</button></p>` : ''}
+      <h3 class="sec">步骤</h3>
+      <ul class="steps">${st.steps.map((x, i) => stepRow(x, i, st.steps.length)).join('') || '<li class="empty">这个阶段还没有步骤，可以在下面添加。</li>'}</ul>
+      <form class="addstep" data-form="addStep"><input name="title" placeholder="添加一个步骤" aria-label="新步骤名称"><button class="btn ghost">添加步骤</button></form>
+      <h3 class="sec">阶段产出</h3>
+      <div class="evidence">
+        <span class="k">依据材料</span>
+        ${(st.evidence || []).length ? st.evidence.map(e => `<span class="chip-sm"><span class="tag">${esc(e.type)}</span>${esc(e.name)}</span>`).join('') : '<span class="hint">还没有关联</span>'}
+        <button class="link" data-act="linkMat">关联材料</button>
+      </div>
+      <div class="fields">${s.fields.map(f => fieldHTML(p, n, f)).join('')}</div>`;
+  }
+
+  function stepRow(x, i, len) {
+    return `<li class="step ${esc(x.status)}" data-step="${esc(x.id)}">
+      <div class="step-line">
+        <select data-act="status" aria-label="步骤状态">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${x.status === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+        <span class="step-title">${esc(x.title)}</span>
+        ${x.risk ? `<span class="tag caution" title="${esc(x.risk)}">风险</span>` : ''}
+        <span class="step-tools">
+          <button class="icon" data-act="risk" title="${x.risk ? '取消风险标记' : '标记风险'}" aria-label="风险">!</button>
+          <button class="icon" data-act="note" title="备注与产出" aria-label="备注">✎</button>
+          <button class="icon" data-act="up" ${i === 0 ? 'disabled' : ''} title="上移" aria-label="上移">↑</button>
+          <button class="icon" data-act="down" ${i === len - 1 ? 'disabled' : ''} title="下移" aria-label="下移">↓</button>
+          <button class="icon" data-act="del" title="删除" aria-label="删除">×</button>
+        </span>
+      </div>
+      ${x.risk ? `<p class="step-risk">风险：${esc(x.risk)}</p>` : ''}
+      <div class="step-more" ${x._open ? '' : 'hidden'}>
+        <label class="fld"><span>备注</span><textarea data-sf="note" rows="2">${esc(x.note)}</textarea></label>
+        <label class="fld"><span>这一步的产出</span><textarea data-sf="output" rows="2">${esc(x.output)}</textarea></label>
+      </div>
+      ${!x._open && (x.note || x.output) ? `<p class="step-peek">${esc(x.output || x.note)}</p>` : ''}
+    </li>`;
+  }
+
+  function fieldHTML(p, n, f) {
+    const v = p.stages[n].fields[f.k];
+    if (f.type === 'textarea') return `<label class="fld"><span>${esc(f.label)}</span><textarea rows="3" data-field="${f.k}">${esc(v || '')}</textarea></label>`;
+    if (f.type === 'number') return `<label class="fld fld-num"><span>${esc(f.label)}</span><input type="number" min="0" step="1" data-field="${f.k}" value="${esc(v ?? '')}"></label>`;
+    if (f.type === 'text') return `<label class="fld"><span>${esc(f.label)}</span><input data-field="${f.k}" value="${esc(v || '')}"></label>`;
+    if (f.type === 'select') return `<label class="fld"><span>${esc(f.label)}</span><select data-field="${f.k}"><option value="">请选择</option>${f.options.map(o => `<option ${v === o ? 'selected' : ''}>${o}</option>`).join('')}</select></label>`;
+    if (f.type === 'metrics') {
+      const ms = v || [];
+      return `<div class="metrics">
+        <div class="m-row m-head"><span>指标名称</span><span>类型</span><span>方向</span><span>阈值</span><span>单位</span><span></span></div>
+        ${ms.map(m => `<div class="m-row" data-metric="${m.id}">
+          <input data-mf="name" value="${esc(m.name)}" aria-label="指标名称">
+          <select data-mf="role" aria-label="类型">${ROLES.map(r => `<option ${m.role === r ? 'selected' : ''}>${r}</option>`).join('')}</select>
+          <select data-mf="op" aria-label="方向"><option value=">=" ${m.op === '>=' ? 'selected' : ''}>不低于</option><option value="<=" ${m.op === '<=' ? 'selected' : ''}>不高于</option></select>
+          <input data-mf="threshold" type="number" step="any" value="${esc(m.threshold)}" aria-label="阈值">
+          <input data-mf="unit" value="${esc(m.unit || '')}" aria-label="单位">
+          <button class="icon" data-act="delMetric" aria-label="删除指标">×</button>
+        </div>`).join('')}
+        <button class="btn ghost" data-act="addMetric">添加指标</button>
+        <p class="hint">北极星：最终业务结果。评测：上线前离线评测看的指标（第 7 阶段检查）。护栏：守住"不可接受的结果"（第 8 阶段检查）。</p>
+      </div>`;
+    }
+    if (f.type === 'results') {
+      const ms = (p.stages[3].fields.metrics || []).filter(m => m.role === f.role);
+      if (!ms.length) return `<div class="fld"><span>${esc(f.label)}</span><p class="hint">第 3 阶段还没有定义${f.role}指标。</p></div>`;
+      const res = v || {};
+      const metaKey = n === 7 ? 'evalMeta' : 'grayMeta';
+      const meta = p.stages[n].fields[metaKey];
+      const stale = !!meta && Engine.hasValues(res) && !Rules.resultsCurrent(p, n);
+      const verText = m => Rules.verText(m, n);
+      const trend = trendCards(p, n, ms, res, stale);
+      return `${trend}<div class="fld"><span>${esc(f.label)}${meta && !stale && Engine.hasValues(res) ? `<small class="ver">按 ${verText(meta)} 录入</small>` : ''}</span>
+        ${stale ? `<p class="notice">这些结果是按 ${verText(meta)} 录入的，之后标准、评测集或构建发生了变化，结果已过期，不能用于放行。<button class="link" data-act="reResult" data-n="${n}">清空并按当前版本重新录入</button></p>` : ''}
+        <div class="results ${stale ? 'stale' : ''}">${ms.map(m => {
+        const ok = Rules.meets(m, res[m.id]), prob = Rules.actualProblem(m, res[m.id]);
+        return `<label class="r-row"><span>${esc(m.name)}<small>标准 ${m.op === '<=' ? '≤' : '≥'} ${esc(m.threshold)}${esc(m.unit || '')}</small></span>
+          <input type="number" step="any" data-result="${f.k}" data-mid="${m.id}" value="${esc(res[m.id] ?? '')}" aria-label="${esc(m.name)}实际值" ${stale ? 'disabled' : ''}>
+          <b class="r-flag ${prob && prob !== 'empty' ? 'stop' : ok === null ? '' : ok ? 'go' : 'stop'}">${prob && prob !== 'empty' ? '格式无效' : ok === null ? '未填' : ok ? '达标' : '未达标'}</b></label>`;
+      }).join('')}</div></div>`;
+    }
+    return '';
+  }
+
+  // ---------- 指标趋势卡片：历次关卡检查的结果 + 当前录入值，带阈值虚线 ----------
+  function sparkline(m, pts) {
+    const W = 260, H = 92, L = 10, R = 10, T = 18, B = 22;
+    const t = Number(m.threshold);
+    const vals = pts.map(x => x.v).concat(isFinite(t) ? [t] : []);
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    if ((m.unit || '').trim() === '%') { lo = Math.max(0, lo); hi = Math.min(100, hi); }
+    if (hi === lo) { hi += 1; lo -= 1; }
+    const pad = (hi - lo) * 0.25; lo -= pad; hi += pad;
+    const x = i => pts.length === 1 ? W / 2 : L + i * (W - L - R) / (pts.length - 1);
+    const y = v => T + (hi - v) / (hi - lo) * (H - T - B);
+    const line = pts.map((pt, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(pt.v).toFixed(1)}`).join(' ');
+    return `<svg class="spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(m.name)}趋势">
+      ${isFinite(t) ? `<line class="thr" x1="0" x2="${W}" y1="${y(t).toFixed(1)}" y2="${y(t).toFixed(1)}"/>` : ''}
+      ${pts.length > 1 ? `<path class="ln" d="${line}"/>` : ''}
+      ${pts.map((pt, i) => { const ok = Rules.meets(m, pt.v); return `<g><title>${esc(pt.title)}</title><circle class="${ok ? 'go' : 'stop'} ${pt.current ? 'cur' : ''}" cx="${x(i).toFixed(1)}" cy="${y(pt.v).toFixed(1)}" r="4.5"/><text class="pv" x="${x(i).toFixed(1)}" y="${(y(pt.v) - 8).toFixed(1)}" text-anchor="middle">${esc(pt.v)}</text><text class="px" x="${x(i).toFixed(1)}" y="${H - 6}" text-anchor="middle">${esc(pt.label)}</text></g>`; }).join('')}
+    </svg>`;
+  }
+
+  function trendCards(p, n, ms, res, stale) {
+    const hist = (p.metricHistory || []).filter(h => h.stage === n);
+    const cards = ms.map(m => {
+      const pts = hist.filter(h => h.values[m.id] !== undefined).map((h, i) => ({ v: h.values[m.id], label: `第 ${i + 1} 次`, title: `${fullTime(h.t)}，第 ${h.iteration} 轮，${Rules.verText(h.ver, n)}` }));
+      const cur = res[m.id];
+      if (!stale && cur !== '' && cur != null && !Rules.actualProblem(m, cur) && (!pts.length || pts[pts.length - 1].v !== Number(cur))) pts.push({ v: Number(cur), label: '当前', title: '当前录入值，还没有做关卡检查', current: true });
+      if (!pts.length) return '';
+      const last = pts[pts.length - 1], prev = pts[pts.length - 2];
+      const ok = Rules.meets(m, last.v);
+      const diff = prev ? Math.round((last.v - prev.v) * 100) / 100 : null;
+      return `<div class="tcard ${ok ? 'go' : 'stop'}">
+        <div class="tc-head"><span class="tc-name">${esc(m.name)}<small>虚线为标准 ${m.op === '<=' ? '≤' : '≥'} ${esc(m.threshold)}${esc(m.unit || '')}</small></span><span class="tag ${ok ? 'go' : 'caution'}">${ok ? '达标' : '未达标'}</span></div>
+        <div class="tc-val"><b>${esc(last.v)}${esc(m.unit || '')}</b>${diff !== null && diff !== 0 ? `<small>比上次${diff > 0 ? '高' : '低'} ${Math.abs(diff)}${m.unit === '%' ? ' 个百分点' : ''}</small>` : pts.length === 1 ? '<small>只有一次记录</small>' : ''}</div>
+        ${sparkline(m, pts)}
+      </div>`;
+    }).filter(Boolean);
+    return `<div class="trend" id="trend${n}">${cards.length ? `<p class="trend-title">指标趋势<small>每次点「推进关卡」都会记一笔；悬停圆点可看当时的依据修订</small></p><div class="tcards">${cards.join('')}</div>` : ''}</div>`;
+  }
+
+  // ---------- 决策台 ----------
+  const STATUS_NAME = { closed: '项目已结束', terminated: '项目已终止' };
+
+  function decisionItem(l) {
+    return `<li class="log-${l.type}">
+      <time>${timeStr(l.t)}</time>
+      <p><b>${esc(l.stageName)}</b>${esc(l.decision)}</p>
+      ${l.rule ? `<p class="log-sub">规则：${esc(l.rule)}</p>` : ''}
+      ${l.ai ? `<p class="log-sub">AI 建议：${esc(l.ai)}</p>` : ''}
+      ${l.approver ? `<p class="log-approver">批准人：${esc(l.approver)}${l.opinion ? `　意见：${esc(l.opinion)}` : ''}</p>` : ''}
+      ${l.reason ? `<p class="log-reason">原因：${esc(l.reason)}</p>` : ''}
+      ${l.snapshot ? `<button class="link snap-link" data-act="viewSnap" data-id="${esc(l.id)}">查看当时依据</button>` : ''}
+    </li>`;
+  }
+
+  function renderDesk(p) {
+    const n = p.currentStage, s = stageByN(n);
+    const next = Rules.nextStep(p);
+    const sess = ui.session && ui.session.stage === n && ui.session.pid === p.id ? ui.session : null;
+    let top = '';
+    if (p.status !== 'active') {
+      top = `<div class="card status-card">
+        <h3>${STATUS_NAME[p.status]}</h3>
+        ${p.statusReason ? `<p class="advice-reason">原因：${esc(p.statusReason)}</p>` : ''}
+        <button class="btn ghost block" data-act="reopen">重新开启项目</button>
+      </div>`;
+    } else if (sess) {
+      top = sessionHTML(p, sess);
+    } else {
+      let primary;
+      if (s.key && !p.stages[n].gatePassed) primary = `<button class="btn primary block" data-act="gate">推进关卡：${esc(s.gate)}</button>`;
+      else if (n === 10) primary = `<button class="btn primary block" data-act="backflow">失败回流，开始第 ${p.iteration + 1} 轮</button>`;
+      else if (n === 9) primary = `<div class="btn-row"><button class="btn primary" data-act="keepMonitor">继续监控</button><button class="btn ghost" data-act="advance">发起迭代</button><button class="btn ghost" data-act="closeProject">结束项目</button></div>`;
+      else primary = `<button class="btn primary block" data-act="advance">完成本阶段，进入第 ${n + 1} 阶段</button>`;
+      top = `<div class="card next">
+        <h3>下一步</h3>
+        <p class="next-text">${esc(next.text)}</p>
+        <p class="hint">由规则计算：先做完当前阶段的步骤，再过关卡，再进下一阶段。</p>
+        ${primary}
+        <button class="btn ghost block" data-act="askAI">问 AI 下一步该怎么走</button>
+      </div>`;
+    }
+    const invalid = STAGES.filter(x => x.key && x.n < n && !p.stages[x.n].gatePassed).map(x => x.n);
+    const invalidCard = invalid.length && p.status === 'active' ? `<div class="card warn-card">
+        <h3>有前置关卡当前无效</h3>
+        <p class="advice-reason">第 ${invalid.join('、')} 关没有确认，或因依据变化已失效。后续关卡会因此被拦截。</p>
+        <div class="btn-row">${invalid.map(k => `<button class="btn ghost" data-act="confirmGate" data-n="${k}">检查并确认第 ${k} 关</button>`).join('')}</div>
+      </div>` : '';
+    $('#desk').innerHTML = `${invalidCard}${top}
+      <div class="card log">
+        <div class="card-head"><h3>决策记录</h3><button class="link" data-act="openLog">查看完整项目日志</button></div>
+        <ol class="loglist">${p.log.filter(l => DECISION_TYPES.includes(l.type)).slice().reverse().map(decisionItem).join('')}</ol>
+      </div>`;
+  }
+
+  function targetOf(sess) {
+    const a = sess.advice, n = sess.stage;
+    if (!a) return null;
+    return a.suggestedStage > n ? n + 1 : a.suggestedStage; // 前进最多一步
+  }
+
+  function sessionHTML(p, sess) {
+    const n = sess.stage, s = stageByN(n);
+    const allPass = sess.rules.every(r => r.pass);
+    const a = sess.advice;
+    const title = sess.kind === 'gate' ? `关卡：${esc(s.gate)}` : sess.kind === 'backflow' ? '失败回流' : '下一步建议';
+    const staleBar = sess.stale ? `<p class="notice">打开${sess.kind === 'gate' ? '关卡' : '建议'}之后，相关数据被修改过，下面的检查结果和建议已经过期。请重新检查后再决定。<button class="link" data-act="recheck">重新检查</button></p>` : '';
+    let rulesBlock = '';
+    if (sess.kind === 'gate') {
+      rulesBlock = `<h4>规则检查</h4>
+        <ul class="rules ${sess.stale ? 'stale' : ''}">${sess.rules.map(r => `<li class="${r.pass ? 'go' : 'stop'}"><span class="mark" aria-hidden="true">${r.pass ? '✓' : '✕'}</span><span>${esc(r.label)}${r.detail ? `<small>${esc(r.detail)}</small>` : ''}</span></li>`).join('')}</ul>
+        <p class="verdict ${allPass ? 'go' : 'stop'}">${allPass ? '规则全部满足，可以推进。' : `拦截：${sess.rules.filter(r => !r.pass).length} 项不满足。`}</p>`;
+    }
+    let adviceBlock = '<p class="hint loading">AI 正在分析…</p>';
+    let actions = '';
+    if (a) {
+      const target = targetOf(sess);
+      const tgtText = target === n ? '留在本阶段' : target > n ? `进入第 ${target} 阶段` : `回到第 ${target} 阶段`;
+      const src = a.preset ? '预设演示建议' : a.source === 'model' ? '模型生成' : '演示模式，由规则模板生成';
+      adviceBlock = `<h4>AI 建议 <small>${src}</small></h4>
+        ${a.warning ? `<p class="notice">${esc(a.warning)}</p>` : ''}
+        <p class="advice">${esc(a.summary)}</p>
+        ${(() => { const parts = String(a.reason).split(/(?<=。)/); const head = parts.slice(0, 2).join(''), rest = parts.slice(2).join(''); return `<p class="advice-reason">${esc(head)}</p>` + (rest ? `<details class="advice-more"><summary>展开完整理由</summary><p class="advice-reason">${esc(rest)}</p></details>` : ''); })()}
+        <details class="advice-more"><summary>备选路线（${a.alternatives.length}）</summary>
+          ${a.alternatives.length ? `<ul class="alts">${a.alternatives.map(x => `<li>第 ${x.stage} 阶段：${esc(x.desc)}</li>`).join('')}</ul>` : '<p class="hint">没有备选路线</p>'}
+        </details>`;
+      let canAdopt = true, adoptHint = '';
+      if (sess.kind === 'backflow') canAdopt = [5, 6].includes(target);
+      else if (target > n) {
+        if (s.key && !allPass) { canAdopt = false; adoptHint = '建议前进，但规则没通过，不能直接采纳。'; }
+        if (!s.key && p.stages[n].steps.some(x => x.status === 'todo' || x.status === 'doing')) { canAdopt = false; adoptHint = '本阶段还有步骤没完成，请用「完成本阶段」并说明原因。'; }
+      }
+      actions = sess.stale ? `<div class="decide-bar"><button class="btn primary" data-act="recheck">重新检查</button><button class="btn ghost" data-act="closeSession">先不决定</button></div>` :
+        `<div class="decide-bar">
+          <p class="decide-title">你的决定</p>
+          <div class="decide">
+            ${canAdopt ? `<button class="btn primary" data-act="adopt">采纳建议：${tgtText}</button>` : ''}
+            ${sess.kind === 'gate' && allPass && target !== n + 1 ? `<button class="btn ghost" data-act="passAnyway">按规则通过，进入第 ${n + 1} 阶段</button>` : ''}
+            <button class="btn ghost" data-act="otherRoute">选其他路线</button>
+            ${sess.kind === 'gate' && !allPass ? '<button class="btn ghost danger" data-act="force">强制放行</button>' : ''}
+            <button class="btn ghost" data-act="closeSession">先不决定</button>
+          </div>
+          <p class="hint">${adoptHint ? esc(adoptHint) + ' ' : ''}推翻建议或规则需填写原因；强制放行会给项目打上风险标记。${sess.kind !== 'backflow' ? '<button class="link danger-link" data-act="terminate">终止项目</button>' : ''}</p>
+        </div>`;
+    }
+    return `<div class="card session ${sess.kind}">
+      <h3>${title}</h3>
+      ${staleBar}${rulesBlock}${adviceBlock}${actions}
+    </div>`;
+  }
+
+  // 关卡放行时记录批准人与意见（单人工具，不做真的多人审批，只记录是谁拍板的）
+  async function askApproval(p, title, desc, opts = {}) {
+    const r = await ask(title, desc, {
+      input: { label: '批准人', value: p.lastApprover || '', placeholder: '例如：业务负责人 张三', required: true },
+      label: opts.reasonLabel || '批准意见（可选）', optional: !opts.reasonRequired,
+      placeholder: opts.placeholder || '例如：同意进入灰度，先观察一周', ok: opts.ok || '确认'
+    });
+    if (!r) return null;
+    p.lastApprover = r.input;
+    return { approver: r.input, text: r.text };
+  }
+
+  // ---------- 推进逻辑（所有推进都走 Engine） ----------
+  async function openSession(kind) {
+    const p = Store.active(), n = p.currentStage;
+    if (p.status !== 'active') return;
+    if (n === 10 && kind === 'next') kind = 'backflow';
+    const rules = Rules.checkGate(p, n);
+    if (kind === 'gate') {
+      p.stages[n].lastGate = rules.every(r => r.pass) ? 'pass' : 'fail';
+      if ((n === 7 || n === 8) && Rules.resultsCurrent(p, n)) Engine.recordResults(p, n); // 每次关卡检查记一笔，用来画趋势
+      Store.save();
+    }
+    const reqId = Store.uid();
+    ui.session = { kind, stage: n, pid: p.id, reqId, rules, sig: Engine.signature(rules), inSig: Engine.inputSignature(p, n), advice: null, stale: false };
+    ui.viewStage = n;
+    render();
+    const advice = await AI.advise(p, { stage: n, rules, kind });
+    const cur = ui.session;
+    if (cur && cur.reqId === reqId && Store.state.activeId === p.id) { cur.advice = advice; renderDesk(Store.active()); }
+  }
+
+  // 拍板前重新检查：依据变了就不允许按旧结果决定
+  // 拍板前重新检查：规则结果或 AI 所依据的数据任何一个变了，都不允许按旧结果决定
+  function sessionChanged(p, sess) {
+    return Engine.signature(Rules.checkGate(p, sess.stage)) !== sess.sig || Engine.inputSignature(p, sess.stage) !== sess.inSig;
+  }
+  function freshRules(p, sess) {
+    if (sess.stale || sessionChanged(p, sess)) {
+      sess.stale = true; renderDesk(p); toast('依据已变化，请重新检查后再决定'); return null;
+    }
+    return Rules.checkGate(p, sess.stage);
+  }
+
+  function markSessionStale(p) {
+    const sess = ui.session;
+    if (!sess || sess.pid !== p.id || sess.stage !== p.currentStage || sess.stale) return;
+    if (sessionChanged(p, sess)) sess.stale = true;
+  }
+
+  // 统一变更入口：所有会改变依据的修改都经过这里，由 Engine 按依赖关系表决定升版本、撤销哪些关卡
+  function commit(p, change, why) {
+    const r = Engine.applyChange(p, change);
+    if (r.skipped) return r;
+    if (r.versions.length) logChanges(p, r.versions, why);
+    r.revoked.forEach(x => Store.log(p, {
+      stage: p.currentStage, stageName: '依据变更', type: 'version',
+      decision: `第 ${x.n} 关「${stageByN(x.n).gate}」失效：${why}后不再满足「${x.fails.join('、')}」${x.cascade.length ? `，连带撤销第 ${x.cascade.join('、')} 关` : ''}`,
+      reason: '', rule: '', ai: ''
+    }));
+    if (r.versions.length || r.revoked.length) toast(`${why}：${r.revoked.length ? `第 ${r.revoked.map(x => x.n).join('、')} 关已失效` : '相关关卡需要重新确认'}，详见决策记录`);
+    markSessionStale(p);
+    return r;
+  }
+
+  async function confirmPriorGate(n) {
+    const p = Store.active(), s = stageByN(n);
+    const rules = Rules.checkGate(p, n);
+    const pass = rules.every(r => r.pass);
+    const dlg = $('#dialog');
+    dlg.innerHTML = `<div class="dlg wide">
+      <div class="card-head"><h3>检查第 ${n} 关「${esc(s.gate)}」</h3><button class="icon" data-act="closeDlg" aria-label="关闭">×</button></div>
+      <p class="dlg-desc">补确认当前阶段之前的关卡，不会改变项目所在的阶段。${pass ? '规则全部满足，可以确认。' : '规则没有全部满足，请先补全这一阶段的产出。'}</p>
+      <ul class="rules">${rules.map(r => `<li class="${r.pass ? 'go' : 'stop'}"><span class="mark">${r.pass ? '✓' : '✕'}</span><span>${esc(r.label)}${r.detail ? `<small>${esc(r.detail)}</small>` : ''}</span></li>`).join('')}</ul>
+      <div class="dlg-actions"><button class="btn ghost" data-act="closeDlg">关闭</button>${pass ? `<button class="btn primary" data-act="doConfirmGate" data-n="${n}">确认第 ${n} 关</button>` : ''}</div>
+    </div>`;
+    if (!dlg.open) { dlg.onclose = null; dlg.showModal(); }
+  }
+
+  async function doConfirmGate(n) {
+    const p = Store.active();
+    $('#dialog').close();
+    const ap = await askApproval(p, `补确认第 ${n} 关「${stageByN(n).gate}」`, '记录由谁批准这次补确认。项目所在的阶段不会改变。', { ok: '确认' });
+    if (!ap) return;
+    const snap = Engine.snapshot(p, n, Rules.checkGate(p, n), null);
+    const r = Engine.confirmGate(p, n);
+    if (!r.ok) { toast(`不能确认：${r.reason}`); return; }
+    Store.log(p, { stage: n, stageName: stageByN(n).gate, type: 'gate', decision: `补确认第 ${n} 关（前置关卡，项目仍在第 ${p.currentStage} 阶段）`, rule: ruleSummary(r.rules), ai: '', reason: '', approver: ap.approver, opinion: ap.text, snapshot: snap });
+    markSessionStale(p);
+    Store.save(); render(); toast(`第 ${n} 关已确认`);
+  }
+
+  function ruleSummary(rules) {
+    if (!rules.length) return '';
+    const ok = rules.filter(r => r.pass).length;
+    const bad = rules.filter(r => !r.pass).map(r => r.label);
+    return `${ok}/${rules.length} 项通过${bad.length ? '；未通过：' + bad.join('、') : ''}`;
+  }
+
+  function logChanges(p, changes, why) {
+    (changes || []).forEach(c => Store.log(p, {
+      stage: p.currentStage, stageName: '版本变更', type: 'version',
+      decision: `${c.name}依据从修订 ${c.from} 变为修订 ${c.to}（${why}）。${c.reset.length ? `第 ${c.reset.join('、')} 关需要重新确认，` : ''}之前录入的结果已过期，不能用于放行`,
+      reason: '', rule: '', ai: ''
+    }));
+  }
+
+  function logDecision(p, n, fields, rules, advice) {
+    Store.log(p, { stage: n, rule: ruleSummary(rules), ai: advice ? advice.summary : '', reason: '', ...fields, snapshot: Engine.snapshot(p, n, rules, advice) });
+  }
+
+  async function doBackflow(p, target, advice, decisionPrefix, rules, reasonIn) {
+    const fails = (p.stages[10].fields.failures || '').split('\n').filter(x => x.trim());
+    let reason = reasonIn || '';
+    if (!fails.length) {
+      const r = await ask('没有记录线上失败案例', '第 10 阶段的失败案例是空的。仍要开始新一轮，需要说明原因。', { ok: '仍然开始' });
+      if (!r) return false;
+      reason = [reason, r.text].filter(Boolean).join('；');
+    }
+    logDecision(p, 10, { stageName: '失败回流', type: 'backflow', decision: `${decisionPrefix}：回流到第 ${target} 阶段，开始第 ${p.iteration + 1} 轮（带入 ${fails.length} 条失败案例）`, reason }, rules, advice);
+    Engine.backflow(p, target);
+    return true;
+  }
+
+  async function decide(act) {
+    const p = Store.active(), sess = ui.session;
+    if (!sess || sess.pid !== p.id) return;
+    const n = sess.stage, s = stageByN(n), a = sess.advice;
+    if (act === 'closeSession') { ui.session = null; renderDesk(p); return; }
+    if (act === 'recheck') { openSession(sess.kind); return; }
+    const rules = freshRules(p, sess);
+    if (!rules) return;
+    const stageName = sess.kind === 'gate' ? s.gate : sess.kind === 'backflow' ? '失败回流' : s.name;
+    const base = { stageName, type: sess.kind === 'gate' ? 'gate' : 'next' };
+
+    if (sess.kind === 'backflow') {
+      let ok = false;
+      if (act === 'adopt') {
+        if (![5, 6].includes(a.suggestedStage)) { toast('回流目标只能是第 5 或第 6 阶段。'); return; }
+        ok = await doBackflow(p, a.suggestedStage, a, '采纳建议', rules);
+      } else if (act === 'otherRoute') {
+        const r = await ask('选择回流阶段', '这会推翻 AI 的建议，需要写明原因。', { select: [{ value: '5', label: '第 5 阶段：评测集构建' }, { value: '6', label: '第 6 阶段：构建与调试' }], selectLabel: '回流到' });
+        if (!r) return;
+        ok = await doBackflow(p, Number(r.select), a, '选其他路线', rules, r.text);
+      }
+      if (!ok) return;
+      ui.session = null; ui.viewStage = p.currentStage; Store.save(); render(); toast(`已开始第 ${p.iteration} 轮`); return;
+    }
+
+    if (act === 'adopt') {
+      const target = targetOf(sess);
+      if (target > n) {
+        let ap = null;
+        if (s.key) {
+          ap = await askApproval(p, `通过第 ${n} 关「${s.gate}」`, '规则已全部满足。记录这次放行由谁批准，会写进决策记录和决策报告。', { ok: '确认通过' });
+          if (!ap) return;
+          if (!freshRules(p, sess)) return;
+        }
+        const snap = Engine.snapshot(p, n, rules, a);
+        const res = Engine.advance(p);
+        if (!res.ok) { toast(`不能推进：${res.reason}。如确需推进，请选择强制放行。`); return; }
+        Store.log(p, { stage: n, ...base, decision: `采纳建议：进入第 ${n + 1} 阶段`, rule: ruleSummary(rules), ai: a.summary, reason: '', approver: ap ? ap.approver : '', opinion: ap ? ap.text : '', snapshot: snap });
+      } else {
+        logDecision(p, n, { ...base, decision: `采纳建议：${target === n ? '留在本阶段' : `回到第 ${target} 阶段`}` }, rules, a);
+        if (target < n) { const r = Engine.back(p, target, a.summary.replace(/^回到第\s*\d+\s*阶段[，,]?\s*/, '')); logChanges(p, r.changes, `回到第 ${target} 阶段返工`); }
+      }
+    } else if (act === 'passAnyway') {
+      const r = await askApproval(p, '按规则通过', `AI 建议的是另一条路线：「${a.summary}」。推翻它需要写明原因，并记录批准人。`, { reasonRequired: true, reasonLabel: '推翻 AI 建议的原因', placeholder: '写清楚为什么不采纳 AI 的建议', ok: '确认通过' });
+      if (!r) return;
+      if (!freshRules(p, sess)) return;
+      const snap = Engine.snapshot(p, n, rules, a);
+      const res = Engine.advance(p);
+      if (!res.ok) { toast(`不能推进：${res.reason}`); return; }
+      Store.log(p, { stage: n, ...base, decision: `推翻 AI 建议，按规则通过，进入第 ${n + 1} 阶段`, rule: ruleSummary(rules), ai: a.summary, reason: r.text, approver: r.approver, opinion: '', snapshot: snap });
+    } else if (act === 'otherRoute') {
+      const opts = [];
+      for (let k = n; k >= 1; k--) opts.push({ value: String(k), label: k === n ? `留在第 ${k} 阶段` : `回到第 ${k} 阶段：${stageByN(k).name}` });
+      const r = await ask('选其他路线', '这会推翻 AI 的建议，需要写明原因。往前推进只能通过规则检查或强制放行。', { select: opts, selectLabel: '去哪个阶段' });
+      if (!r) return;
+      const target = Number(r.select);
+      logDecision(p, n, { ...base, decision: `选其他路线：${target === n ? '留在本阶段' : `回到第 ${target} 阶段`}`, reason: r.text }, rules, a);
+      if (target < n) { const res = Engine.back(p, target, r.text); logChanges(p, res.changes, `回到第 ${target} 阶段返工`); }
+    } else if (act === 'force') {
+      const r = await askApproval(p, '强制放行', '规则没有全部满足。强制放行必须写明原因和批准人，项目会被标记为"有风险"，这条决定会一直留在记录里。', { reasonRequired: true, reasonLabel: '强制放行的原因', ok: '确认强制放行', placeholder: '例如：业务方书面确认接受当前漏检率，先灰度观察两周' });
+      if (!r) return;
+      if (!freshRules(p, sess)) return;
+      const snap = Engine.snapshot(p, n, rules, a);
+      Engine.advance(p, { force: true });
+      Store.log(p, { stage: n, ...base, type: 'force', decision: `强制放行，进入第 ${n + 1} 阶段`, rule: ruleSummary(rules), ai: a.summary, reason: r.text, approver: r.approver, opinion: '', snapshot: snap });
+    } else if (act === 'terminate') {
+      const r = await ask('终止项目', '终止后项目停止推进，记录全部保留，之后可以重新开启。', { ok: '确认终止', placeholder: '例如：可行性评估结论为不可行，业务方同意不立项' });
+      if (!r) return;
+      logDecision(p, n, { ...base, type: 'close', decision: '终止项目', reason: r.text }, rules, a);
+      p.status = 'terminated'; p.statusReason = r.text;
+    }
+    ui.session = null; ui.viewStage = p.currentStage; Store.save(); render();
+  }
+
+  async function advanceNonKey() {
+    const p = Store.active(), n = p.currentStage;
+    if (stageByN(n).key || n >= 10) return;
+    const left = p.stages[n].steps.filter(x => x.status === 'todo' || x.status === 'doing');
+    let reason = '';
+    if (left.length) {
+      const r = await ask('还有步骤没完成', `未完成：${left.map(x => x.title).join('、')}。仍然推进需要写明原因。`, { ok: '仍然推进' });
+      if (!r) return;
+      reason = r.text;
+    }
+    const snap = Engine.snapshot(p, n, [], null);
+    const res = Engine.advance(p);
+    if (!res.ok) { toast(res.reason); return; }
+    Store.log(p, { stage: n, stageName: stageByN(n).name, type: 'advance', decision: n === 9 ? '发起迭代：进入第 10 阶段' : `完成第 ${n} 阶段，进入第 ${n + 1} 阶段${left.length ? `（${left.length} 个步骤未完成）` : ''}`, reason, rule: '', ai: '', snapshot: snap });
+    ui.viewStage = p.currentStage; ui.session = null;
+    Store.save(); render();
+  }
+
+  async function statusAction(act) {
+    const p = Store.active();
+    if (act === 'keepMonitor') {
+      const r = await ask('继续监控', '记录一次监控结论，项目留在第 9 阶段。', { label: '监控结论（可选）', optional: true, ok: '记录' });
+      if (!r) return;
+      Store.log(p, { stage: 9, stageName: '线上监控', type: 'next', decision: '继续监控', reason: r.text, rule: '', ai: '', snapshot: Engine.snapshot(p, 9, [], null) });
+    } else if (act === 'closeProject') {
+      const r = await ask('结束项目', '项目正常收尾，停止推进。记录全部保留，之后可以重新开启。', { ok: '确认结束', placeholder: '例如：全量运行稳定三个月，转入常规运营' });
+      if (!r) return;
+      Store.log(p, { stage: p.currentStage, stageName: '项目状态', type: 'close', decision: '结束项目', reason: r.text, rule: '', ai: '', snapshot: Engine.snapshot(p, p.currentStage, [], null) });
+      p.status = 'closed'; p.statusReason = r.text;
+    } else if (act === 'reopen') {
+      const r = await ask('重新开启项目', '项目会回到进行中，停在当前阶段。', { ok: '重新开启' });
+      if (!r) return;
+      Store.log(p, { stage: p.currentStage, stageName: '项目状态', type: 'close', decision: '重新开启项目', reason: r.text, rule: '', ai: '' });
+      p.status = 'active'; p.statusReason = '';
+    }
+    Store.save(); render();
+  }
+
+  function viewSnap(id) {
+    const p = Store.active(), l = p.log.find(x => x.id === id);
+    if (!l || !l.snapshot) return;
+    const sn = l.snapshot, a = sn.advice;
+    const ms = sn.metrics;
+    const target = a && a.suggestedStage ? (a.suggestedStage === sn.stage ? '留在本阶段' : `第 ${a.suggestedStage} 阶段`) : '';
+    const fieldLabel = (k, key) => { const f = stageByN(Number(k)).fields.find(x => x.k === key); return f ? f.label : key; };
+    const fieldsBlock = sn.fields ? Object.entries(sn.fields).map(([k, fs]) => Object.entries(fs)
+      .filter(([key, v]) => !['metrics', 'evalResults', 'grayResults', 'evalMeta', 'grayMeta'].includes(key) && v !== '' && v != null)
+      .map(([key, v]) => `<p><b>第 ${k} 阶段 · ${esc(fieldLabel(k, key))}</b>：${longText(typeof v === 'object' ? JSON.stringify(v) : v)}</p>`).join('')).join('') : '';
+    const dlg = $('#dialog');
+    dlg.innerHTML = `<div class="dlg wide snapdlg">
+      <div class="card-head"><h3>决策依据</h3><button class="icon" data-act="closeDlg" aria-label="关闭">×</button></div>
+      <p class="snap-head"><b>${esc(l.stageName)}</b>${esc(l.decision)}</p>
+      <p class="hint">${fullTime(l.t)}，第 ${sn.stage} 阶段。当时依据：${Rules.verText(sn.ver, 7)}</p>
+      ${l.approver ? `<p class="log-approver">批准人：${esc(l.approver)}${l.opinion ? `　意见：${esc(l.opinion)}` : ''}</p>` : ''}
+      ${l.reason ? `<p class="log-reason">原因：${esc(l.reason)}</p>` : ''}
+      ${sn.rules.length ? `<h4>规则检查明细</h4><ul class="rules">${sn.rules.map(r => `<li class="${r.pass ? 'go' : 'stop'}"><span class="mark">${r.pass ? '✓' : '✕'}</span><span>${esc(r.label)}${r.detail ? `<small>${esc(r.detail)}</small>` : ''}</span></li>`).join('')}</ul>` : ''}
+      ${ms.length ? `<h4>当时的指标</h4><table class="snap-table"><thead><tr><th>指标</th><th>类型</th><th>标准</th><th>实测</th><th>结果</th></tr></thead><tbody>${ms.map(m => { const empty = m.actual === undefined || m.actual === '' || m.actual === null; const ok = empty ? null : Rules.meets(m, m.actual); return `<tr><td>${esc(m.name)}</td><td>${esc(m.role)}</td><td>${m.op === '<=' ? '≤' : '≥'} ${esc(m.threshold)}${esc(m.unit)}</td><td>${empty ? '未录入' : esc(m.actual) + esc(m.unit)}</td><td class="${ok === null ? '' : ok ? 'go' : 'stop'}">${ok === null ? (empty ? '—' : '格式无效') : ok ? '达标' : '未达标'}</td></tr>`; }).join('')}</tbody></table>` : ''}
+      ${sn.resultMeta && (sn.resultMeta.eval || sn.resultMeta.gray) ? `<p class="hint">${sn.resultMeta.eval ? `评测结果按 ${Rules.verText(sn.resultMeta.eval, 7)} 录入。` : ''}${sn.resultMeta.gray ? `灰度结果按 ${Rules.verText(sn.resultMeta.gray, 8)} 录入。` : ''}</p>` : ''}
+      ${fieldsBlock ? `<details class="more"><summary>当时的阶段产出（含错误样例、评测集说明、构建记录等）</summary>${fieldsBlock}</details>` : ''}
+      ${sn.evidence.length ? `<h4>关联材料</h4><p>${sn.evidence.map(e => `<span class="tag">${esc(e.type)}</span> ${esc(e.name)}`).join('　')}</p>` : ''}
+      ${a ? `<h4>当时的 AI 建议 <small>${a.preset ? '预设演示建议' : a.source === 'model' ? '模型生成' : '规则模板生成'}${target ? `，建议去向：${target}` : ''}</small></h4><p class="advice">${esc(a.summary)}</p><p class="advice-reason">${esc(a.reason)}</p>${a.alternatives.length ? `<ul class="alts">${a.alternatives.map(x => `<li>第 ${x.stage} 阶段：${esc(x.desc)}</li>`).join('')}</ul>` : ''}` : ''}
+      ${window.self === window.top ? `<div class="dlg-actions"><button class="btn ghost" data-act="exportOne" data-id="${esc(l.id)}">导出这次决定（Markdown）</button></div>` : ''}
+    </div>`;
+    if (!dlg.open) { dlg.onclose = null; dlg.showModal(); }
+  }
+
+  // ---------- 步骤操作 ----------
+  async function stepAction(act, stepId) {
+    const p = Store.active(), n = ui.viewStage, list = p.stages[n].steps;
+    const i = list.findIndex(x => x.id === stepId), x = list[i];
+    const sn = stageByN(n).name;
+    if (act === 'risk') {
+      if (x.risk) { Store.log(p, { stage: n, stageName: sn, type: 'mark', decision: `取消风险标记：${x.title}`, reason: '', rule: '', ai: '' }); x.risk = ''; commit(p, { type: 'step', stage: n, key: 'risk' }, '修改了风险标记'); }
+      else {
+        const r = await ask('标记风险', `步骤：${x.title}`, { label: '风险说明', placeholder: '例如：评测数据可能不够', ok: '标记' });
+        if (!r) return; x.risk = r.text;
+        Store.log(p, { stage: n, stageName: sn, type: 'mark', decision: `标记风险：${x.title}`, reason: r.text, rule: '', ai: '' });
+        commit(p, { type: 'step', stage: n, key: 'risk' }, '修改了风险标记');
+      }
+    } else if (act === 'note') {
+      x._open = !x._open;
+    } else if (act === 'up' || act === 'down') {
+      const j = act === 'up' ? i - 1 : i + 1;
+      const r = await ask('调整步骤顺序', `把「${x.title}」${act === 'up' ? '上移' : '下移'}。调整步骤需要写明原因。`);
+      if (!r) return;
+      [list[i], list[j]] = [list[j], list[i]];
+      Store.log(p, { stage: n, stageName: sn, type: 'adjust', decision: `调整顺序：「${x.title}」${act === 'up' ? '上移' : '下移'}`, reason: r.text, rule: '', ai: '' });
+      commit(p, { type: 'step', stage: n, key: 'order' }, '调整了步骤顺序');
+    } else if (act === 'del') {
+      const r = await ask('删除步骤', `删除「${x.title}」。调整步骤需要写明原因。`, { ok: '删除' });
+      if (!r) return;
+      list.splice(i, 1);
+      Store.log(p, { stage: n, stageName: sn, type: 'adjust', decision: `删除步骤：${x.title}`, reason: r.text, rule: '', ai: '' });
+      commit(p, { type: 'step', stage: n, key: 'delete' }, `删除了第 ${n} 阶段的步骤`);
+    }
+    Store.save(); renderStage(p); renderTrack(p); renderDesk(p);
+  }
+
+  async function setStatus(stepId, val, sel) {
+    const p = Store.active(), n = ui.viewStage;
+    const x = p.stages[n].steps.find(s => s.id === stepId);
+    if (val === 'skipped') {
+      const r = await ask('跳过步骤', `跳过「${x.title}」需要写明原因。`, { ok: '跳过' });
+      if (!r) { sel.value = x.status; return; }
+      Store.log(p, { stage: n, stageName: stageByN(n).name, type: 'adjust', decision: `跳过步骤：${x.title}`, reason: r.text, rule: '', ai: '' });
+    }
+    if (val !== 'skipped') Store.log(p, { stage: n, stageName: stageByN(n).name, type: 'status', decision: `「${x.title}」：${STATUS[x.status]} 改为 ${STATUS[val]}`, reason: '', rule: '', ai: '' });
+    const was = x.status;
+    x.status = val;
+    // 完成状态的变化代表资产变化（第 5、6 阶段会升修订）；其余状态变化只触发关卡复核
+    commit(p, { type: 'step', stage: n, key: was === 'done' || val === 'done' ? 'done' : 'status', before: was, after: val }, `修改了第 ${n} 阶段的步骤状态`);
+    Store.save(); renderStage(p); renderTrack(p); renderDesk(p);
+  }
+
+  // ---------- 新建项目 ----------
+  const SAMPLE = `目前私域培育群约 5 万人，成交转化率只有约 0.8%，每月大约 400 单。群里其实有不少人在问课程、说自己的问题，但运营人员看不过来，很多有意向的人没被及时跟进。希望用 AI 识别群里的意向信号，把有意向的人及时转给销售，提高培育群的成交转化。`;
+
+  function wizardSteps(cur) {
+    return `<ol class="wsteps">${['上传材料', '确认拆解', '生成项目'].map((t, i) => `<li class="${i + 1 < cur ? 'done' : i + 1 === cur ? 'on' : ''}"><span>${i + 1}</span>${t}</li>`).join('')}</ol>`;
+  }
+  const extOf = n => (n.split('.').pop() || '').toUpperCase().slice(0, 4);
+
+  function renderCreate() {
+    const d = ui.draft || (ui.draft = { name: '', text: '', files: [], analysis: null, loading: false, parsing: false });
+    if (!d.analysis) {
+      const okFiles = d.files.filter(f => f.ok);
+      $('#main').innerHTML = `
+        <div class="wizard">
+          ${wizardSteps(1)}
+          <h1>新建项目</h1>
+          <p class="lead">上传这个项目已有的文档，一份或多份都行。AI 会判断项目进行到哪一步，再拆出接下来要做的事。</p>
+          <section class="wcard">
+            <label class="drop big ${d.parsing ? 'busy' : ''}" id="drop">
+              <input type="file" id="cFile" multiple accept="${window.Files.ACCEPT}" hidden>
+              <svg class="drop-icon" viewBox="0 0 48 48" aria-hidden="true"><rect x="12" y="6" width="24" height="32" rx="3"/><path d="M18 16h12M18 22h12M18 28h7"/><path d="M24 46V34m-5 5l5-5 5 5"/></svg>
+              <b>${d.parsing ? '正在读取文件…' : '把文件拖到这里，或点击选择'}</b>
+              <small>需求描述、BRD、PRD、评审纪要、评测报告都可以；支持 Markdown、TXT、Word、PDF、CSV、JSON</small>
+            </label>
+            ${d.files.length ? `<ul class="wfiles">${d.files.map((f, i) => `
+              <li class="${f.ok ? '' : 'bad'}">
+                <span class="ext">${esc(extOf(f.name))}</span>
+                <span class="fname">${esc(f.name)}</span>
+                <span class="fmeta">${f.ok ? `${f.chars} 字${f.truncated ? '，只取前 20000 字' : ''}` : esc(f.error)}</span>
+                <button class="icon" data-act="rmFile" data-i="${i}" aria-label="移除">×</button>
+              </li>`).join('')}</ul>` : ''}
+            <details class="wextra" ${d.text ? 'open' : ''} id="cExtra">
+              <summary>粘贴文字或补充说明<small>可选</small></summary>
+              <textarea id="cText" rows="5" placeholder="没有文件也可以直接粘贴需求描述；或者写业务方口头补充的背景">${esc(d.text)}</textarea>
+            </details>
+            <label class="wname"><span>项目名称</span><input id="cName" value="${esc(d.name)}" placeholder="可以不填，AI 会根据文档内容拟定"></label>
+          </section>
+          <div class="wactions">
+            <button class="link" data-act="fillSample">没有文档？用示例需求试一下</button>
+            <span class="grow"></span>
+            ${Store.state.projects.length ? '<button class="btn ghost" data-act="cancelCreate">取消</button>' : ''}
+            <button class="btn primary" data-act="analyze" ${d.loading || d.parsing ? 'disabled' : ''}>${d.loading ? 'AI 分析中…' : `分析并拆解${okFiles.length ? `（${okFiles.length} 个文件）` : ''}`}</button>
+          </div>
+        </div>`;
+      const addFiles = async list => {
+        if (!list || !list.length) return;
+        d.name = $('#cName').value; d.text = $('#cText').value; d.parsing = true; renderCreate();
+        const parsed = await window.Files.parseFiles(list);
+        if (ui.draft !== d || ui.view !== 'create') return; // 已取消或切走
+        d.files.push(...parsed); d.parsing = false;
+        renderCreate();
+        const bad = parsed.filter(f => !f.ok).length;
+        if (bad) toast(`${bad} 个文件没有读出内容，已在列表中标出原因`);
+      };
+      $('#cFile').onchange = e => addFiles(e.target.files);
+      const drop = $('#drop');
+      drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+      drop.ondragleave = () => drop.classList.remove('over');
+      drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); addFiles(e.dataTransfer.files); };
+      return;
+    }
+
+    const a = d.analysis, g = a.stageGuess;
+    const total = STAGES.reduce((n, s) => n + a.steps[s.n].length, 0);
+    const stageBlock = s => `
+      <section class="tstage ${s.key ? 'key' : ''} ${s.n === g ? 'current' : ''}">
+        <span class="tnode">${s.n}</span>
+        <div class="tbody">
+          <h3>${esc(s.name)}${s.key ? `<span class="tag">${esc(s.gate)}</span>` : ''}${s.n === g ? '<span class="tag go">当前工作阶段</span>' : ''}</h3>
+          <ul class="tsteps">${a.steps[s.n].map((t, i) => `<li><input class="inline" data-ds="${s.n}" data-i="${i}" value="${esc(t)}" placeholder="写一个步骤" aria-label="第 ${s.n} 阶段步骤"><button class="icon" data-act="dsDel" data-n="${s.n}" data-i="${i}" aria-label="删除步骤">×</button></li>`).join('')}</ul>
+          <button class="link add" data-act="dsAdd" data-n="${s.n}">＋ 添加步骤</button>
+        </div>
+      </section>`;
+    const pre = STAGES.filter(s => s.n < g), rest = STAGES.filter(s => s.n >= g);
+    $('#main').innerHTML = `
+      <div class="wizard">
+        ${wizardSteps(2)}
+        <h1>确认拆解结果</h1>
+        <p class="lead">核对 AI 的判断，按需增删步骤。确认后才会生成项目。</p>
+        ${a.warning ? `<p class="notice">${esc(a.warning)}</p>` : ''}
+        <section class="wcard wsum">
+          <label class="wname big"><span>项目名称${ui.draft.autoName ? '<small>AI 根据文档拟定，可以修改</small>' : ''}</span><input id="cName2" value="${esc(ui.draft.name)}"></label>
+          <div class="wgrid">
+            <label><span>当前工作阶段</span><select id="cStart">${STAGES.map(s => `<option value="${s.n}" ${s.n === g ? 'selected' : ''}>第 ${s.n} 阶段：${esc(s.name)}</option>`).join('')}</select></label>
+            <div><span>识别的材料</span><b>${esc(a.docType)}</b></div>
+          </div>
+          <p class="wreason">${esc(a.reason)}<small>${a.source === 'model' ? '由模型判断' : '演示模式：由关键词规则判断'}</small></p>
+          ${a.files && a.files.length > 1 ? `<details class="wfj"><summary>逐个文件的判断（${a.files.length} 份）</summary><ul class="ftypes">${a.files.map(f => `<li><span class="tag">${esc(f.type)}</span><b>${esc(f.name)}</b><small>${esc(f.reason)}</small></li>`).join('')}</ul></details>` : ''}
+          ${a.missing.length ? `<div class="wmiss"><b>文档里缺这些信息</b><ul>${a.missing.map(m => `<li>${esc(m)}</li>`).join('')}</ul></div>` : ''}
+        </section>
+        <h2 class="wsub">拆解结果<small>${total} 个步骤，可以直接点文字修改</small></h2>
+        <div class="timeline-edit">
+          ${pre.length ? `<details class="pregroup" id="preGroup" ${d.preOpen ? 'open' : ''}>
+            <summary><span class="tnode muted">1${pre.length > 1 ? `–${pre.length}` : ''}</span><span><b>第 1${pre.length > 1 ? ` 至 ${pre.length}` : ''} 阶段：未核验</b><small>在当前工作阶段之前。生成后需要对照材料确认，展开可修改步骤</small></span></summary>
+            ${pre.map(stageBlock).join('')}
+          </details>` : ''}
+          ${rest.map(stageBlock).join('')}
+        </div>
+        <div class="wfoot">
+          <span class="wfoot-info">${total} 个步骤，从第 ${g} 阶段开始</span>
+          <span class="grow"></span>
+          <button class="btn ghost" data-act="backToDoc">返回修改材料</button>
+          <button class="btn primary" data-act="confirmCreate">确认并生成项目</button>
+        </div>
+      </div>`;
+    $('#cStart').onchange = () => { syncDraftSteps(); renderCreate(); };
+    const pg = $('#preGroup'); if (pg) pg.ontoggle = () => { d.preOpen = pg.open; }; // 增删步骤重绘后保持展开
+  }
+
+  function syncDraftSteps() {
+    const d = ui.draft;
+    document.querySelectorAll('[data-ds]').forEach(inp => { d.analysis.steps[inp.dataset.ds][inp.dataset.i] = inp.value; });
+    const nm = $('#cName2'), st = $('#cStart');
+    if (nm) d.name = nm.value;
+    if (st) d.analysis.stageGuess = Number(st.value);
+  }
+
+  // ---------- 事件 ----------
+  document.addEventListener('click', async e => {
+    const b = e.target.closest('[data-act]');
+    if (!b || b.tagName === 'SELECT') return;
+    const act = b.dataset.act;
+    const p = Store.active();
+    const stepEl = b.closest('[data-step]');
+    if (stepEl && ['risk', 'note', 'up', 'down', 'del'].includes(act)) { e.preventDefault(); stepAction(act, stepEl.dataset.step); return; }
+
+    switch (act) {
+      case 'new': ui.view = 'create'; ui.draft = null; ui.session = null; render(); break;
+      case 'open': Store.state.activeId = b.dataset.id; Store.save(); ui.view = 'project'; ui.viewStage = null; ui.session = null; render(); break;
+      case 'toggleMode': AI.mode = AI.mode === 'model' ? 'demo' : 'model'; ui.session = null; render(); break;
+      case 'resetDemo': if (confirm('把示例项目恢复到初始状态？你对示例项目做的修改会丢失。')) { Store.resetDemo(); ui.view = 'project'; ui.viewStage = null; ui.session = null; render(); toast('示例项目已重置'); } break;
+      case 'viewStage': ui.viewStage = Number(b.dataset.n); renderTrack(p); renderStage(p); $('#stagePanel').scrollTop = 0; break;
+      case 'gate': openSession('gate'); break;
+      case 'askAI': openSession('next'); break;
+      case 'backflow': openSession('backflow'); break;
+      case 'advance': advanceNonKey(); break;
+      case 'adopt': case 'passAnyway': case 'otherRoute': case 'force': case 'closeSession': decide(act); break;
+      case 'addMetric': case 'delMetric': {
+        const f = p.stages[3].fields; f.metrics = f.metrics || [];
+        if (act === 'addMetric') {
+          f.metrics.push({ id: Store.uid(), name: '', role: '评测', op: '>=', threshold: '', unit: '%' });
+          logEdit(p, 3, 'metric:add', '添加一个指标');
+          commit(p, { type: 'metric', stage: 3, key: 'add' }, '修改了验收标准');
+        } else {
+          const id = b.closest('[data-metric]').dataset.metric, m = f.metrics.find(x => x.id === id);
+          f.metrics = f.metrics.filter(x => x.id !== id);
+          logEdit(p, 3, `metric:${id}`, `删除指标「${m.name || '未命名'}」`, `${m.name}，${m.role}，${m.op === '<=' ? '不高于' : '不低于'} ${m.threshold}${m.unit || ''}`, '（已删除）');
+          commit(p, { type: 'metric', stage: 3, key: 'delete' }, '修改了验收标准');
+        }
+        Store.save(); renderStage(p); renderTrack(p); renderDesk(p); break;
+      }
+      case 'confirmGate': confirmPriorGate(Number(b.dataset.n)); break;
+      case 'doConfirmGate': doConfirmGate(Number(b.dataset.n)); break;
+      case 'recheck': case 'terminate': decide(act); break;
+      case 'keepMonitor': case 'closeProject': case 'reopen': statusAction(act); break;
+      case 'viewSnap': viewSnap(b.dataset.id); break;
+      case 'verify': {
+        p.stages[ui.viewStage].fromDoc = false;
+        Store.log(p, { stage: ui.viewStage, stageName: stageByN(ui.viewStage).name, type: 'status', decision: '标记为已核验（产出已对照材料确认）', reason: '', rule: '', ai: '' });
+        Store.save(); renderStage(p); renderTrack(p); break;
+      }
+      case 'reResult': {
+        const n = Number(b.dataset.n);
+        const oldMeta = p.stages[n].fields[n === 7 ? 'evalMeta' : 'grayMeta'];
+        Engine.recordResults(p, n, p.stages[n].fields[n === 7 ? 'evalResults' : 'grayResults'], oldMeta);
+        const old = Engine.clearResults(p, n);
+        logEdit(p, n, 'result:reset', '旧结果已过期，清空后按当前依据重新录入', old, '（已清空）');
+        commit(p, { type: 'result', stage: n, key: 'reset', before: old, after: {} }, '清空了评测结果');
+        Store.save(); renderStage(p); renderDesk(p); break;
+      }
+      case 'linkMat': openLinkMat(); break;
+      case 'saveLinks': {
+        const n = ui.viewStage, files = materialList(p);
+        const picked = [...document.querySelectorAll('[data-link]:checked')].map(x => files[Number(x.dataset.link)]).map(f => ({ id: f.id, name: f.name, type: f.type || '未识别' }));
+        const before = (p.stages[n].evidence || []).map(e => e.name).join('、');
+        p.stages[n].evidence = picked;
+        logEdit(p, n, 'evidence', '更新依据材料', before, picked.map(e => e.name).join('、'));
+        commit(p, { type: 'evidence', stage: n, key: 'evidence', before, after: picked.map(e => e.name).join('、') }, '修改了依据材料');
+        $('#dialog').close(); Store.save(); renderStage(p); renderDesk(p); break;
+      }
+      case 'openExport': openExport(); break;
+      case 'exportProj': download(`${safeName(p.name)}_项目备份.json`, JSON.stringify(p, null, 2), 'application/json'); $('#dialog').close(); toast('已导出项目备份'); break;
+      case 'exportReport': download(`${safeName(p.name)}_决策报告.md`, buildReport(p), 'text/markdown'); $('#dialog').close(); toast('已导出决策报告'); break;
+      case 'exportOne': { const l = p.log.find(x => x.id === b.dataset.id); download(`${safeName(p.name)}_决策_${new Date(l.t).toISOString().slice(0, 10)}.md`, buildReport(p, l.id), 'text/markdown'); toast('已导出这次决定'); break; }
+      case 'openLog': openLog('all'); break;
+      case 'openMats': openMats(); break;
+      case 'logFilter': openLog(b.dataset.k); break;
+      case 'closeDlg': $('#dialog').close(); break;
+      case 'closeNotice': ui.material = null; renderMaterials(p); break;
+      case 'openMat': {
+        const f = materialList(p)[Number(b.dataset.i)];
+        const dlg = $('#dialog');
+        dlg.innerHTML = `<form method="dialog" class="dlg wide"><h3>${esc(f.name)}</h3>
+          <p class="dlg-desc">${esc(f.type || '')}，${f.addedAt ? `第 ${f.addedStage} 阶段${f.addedStageName ? `（${esc(f.addedStageName)}）` : ''}时补充，${fullTime(f.addedAt)}` : '创建项目时上传'}</p>
+          <pre class="doc">${esc(f.text || '（没有保存原文）')}</pre>
+          <div class="dlg-actions"><button class="btn primary">关闭</button></div></form>`;
+        dlg.onclose = null; dlg.showModal(); break;
+      }
+      case 'showDoc': {
+        const dlg = $('#dialog');
+        const fl = p.doc.files && p.doc.files.length ? p.doc.files : [{ name: '来源文档', type: p.doc.type, text: p.doc.text }];
+        dlg.innerHTML = `<form method="dialog" class="dlg wide"><h3>来源文档（${fl.length} 份）</h3>
+          ${fl.map(f => `<details class="docf" ${fl.length === 1 ? 'open' : ''}><summary><span class="tag">${esc(f.type || '')}</span> ${esc(f.name)}</summary><pre class="doc">${esc(f.text)}</pre></details>`).join('')}
+          ${p.doc.missing && p.doc.missing.length ? `<h4>创建时的缺失信息提醒</h4><ul class="missing">${p.doc.missing.map(m => `<li>${esc(m)}</li>`).join('')}</ul>` : ''}
+          <div class="dlg-actions"><button class="btn primary">关闭</button></div></form>`;
+        dlg.onclose = null; dlg.showModal(); break;
+      }
+      case 'export_old': {
+        const blob = new Blob([JSON.stringify(p, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `${p.name}.json`; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000); break;
+      }
+      case 'delete': if (confirm(`删除项目「${p.name}」？这一步不能撤销。`)) { Store.remove(p.id); ui.viewStage = null; ui.session = null; ui.view = Store.state.projects.length ? 'project' : 'create'; render(); } break;
+      case 'fillSample': { const ex = $('#cExtra'); if (ex) ex.open = true; } $('#cText').value = SAMPLE; if (!$('#cName').value) $('#cName').value = '培育群意向识别'; break;
+      case 'cancelCreate': ui.view = 'project'; ui.draft = null; render(); break;
+      case 'analyze': {
+        const d = ui.draft;
+        d.name = $('#cName').value.trim(); d.text = $('#cText').value.trim();
+        const docs = d.files.filter(f => f.ok).map(f => ({ name: f.name, text: f.text, truncated: f.truncated, chars: f.chars }));
+        if (d.text) docs.push({ name: '补充说明', text: d.text });
+        if (!docs.length) { toast('先上传文件，或在补充说明里粘贴文字。'); return; }
+        d.autoName = !d.name;
+        d.docs = docs; d.loading = true; d.token = Store.uid(); renderCreate();
+        const token = d.token;
+        const a = await AI.analyze(docs.map(x => ({ name: x.name, text: x.text })));
+        if (ui.draft !== d || d.token !== token || ui.view !== 'create') break; // 已取消或切走，丢弃旧结果
+        if (d.autoName) d.name = a.projectName || '未命名项目';
+        d.loading = false; d.analysis = a; renderCreate(); break;
+      }
+      case 'rmFile': ui.draft.files.splice(Number(b.dataset.i), 1); ui.draft.name = $('#cName').value; ui.draft.text = $('#cText').value; renderCreate(); break;
+      case 'backToDoc': if (ui.draft.autoName) ui.draft.name = ''; ui.draft.analysis = null; renderCreate(); break;
+      case 'dsDel': syncDraftSteps(); ui.draft.analysis.steps[b.dataset.n].splice(Number(b.dataset.i), 1); renderCreate(); break;
+      case 'dsAdd': { syncDraftSteps(); const n = b.dataset.n; ui.draft.analysis.steps[n].push(''); renderCreate(); const ins = document.querySelectorAll(`[data-ds="${n}"]`); if (ins.length) ins[ins.length - 1].focus(); break; }
+      case 'confirmCreate': {
+        syncDraftSteps();
+        const a = ui.draft.analysis;
+        ui.draft.name = (ui.draft.name || '').trim() || '未命名项目';
+        const steps = {}; Object.keys(a.steps).forEach(k => { steps[k] = a.steps[k].map(s => s.trim()).filter(Boolean); });
+        const docs = ui.draft.docs || [];
+        const proj = Store.makeProject({ name: ui.draft.name, docText: docs.map(x => `【${x.name}】\n${x.text}`).join('\n\n'), analysis: a, stepsByStage: steps });
+        proj.doc.files = (a.files || []).map(f => { const src = docs.find(x => x.name === f.name) || {}; return { ...f, id: 'm' + Store.uid(), text: src.text || '', truncated: !!src.truncated, chars: src.chars }; });
+        Store.add(proj); ui.view = 'project'; ui.draft = null; ui.viewStage = null; render(); toast('项目已生成'); break;
+      }
+    }
+  });
+
+  document.addEventListener('change', e => {
+    if (e.target.id === 'projSel') {
+      Store.state.activeId = e.target.value; Store.save();
+      ui.view = 'project'; ui.viewStage = null; ui.session = null; ui.draft = null; render(); return;
+    }
+    const t = e.target, p = Store.active();
+    if (!p || ui.view !== 'project') return;
+    const n = ui.viewStage;
+    if (t.dataset.act === 'status') { setStatus(t.closest('[data-step]').dataset.step, t.value, t); return; }
+    if (t.dataset.sf) {
+      const x = p.stages[n].steps.find(s => s.id === t.closest('[data-step]').dataset.step);
+      const before = x[t.dataset.sf];
+      x[t.dataset.sf] = t.value;
+      logEdit(p, n, `${x.id}:${t.dataset.sf}`, `更新步骤「${x.title}」的${t.dataset.sf === 'note' ? '备注' : '产出'}`, before, t.value);
+      commit(p, { type: 'step', stage: n, key: t.dataset.sf, before, after: t.value }, `修改了第 ${n} 阶段的步骤${t.dataset.sf === 'note' ? '备注' : '产出'}`);
+      Store.save(); renderTrack(p); renderDesk(p); return;
+    }
+    if (t.dataset.field) {
+      const k = t.dataset.field, f = stageByN(n).fields.find(x => x.k === k);
+      const before = p.stages[n].fields[k];
+      const val = f && f.type === 'number' ? (t.value === '' ? '' : Number(t.value)) : t.value;
+      p.stages[n].fields[k] = val;
+      const label = f ? f.label.replace(/（.*）/, '') : k;
+      logEdit(p, n, k, `修改「${label}」`, before, val);
+      const r = commit(p, { type: 'field', stage: n, key: k, before, after: val }, `修改了「${label}」`);
+      if (r.versions.length || r.revoked.length) renderStage(p);
+    } else if (t.dataset.mf) {
+      const m = p.stages[3].fields.metrics.find(m => m.id === t.closest('[data-metric]').dataset.metric);
+      const desc = () => `${m.name}，${m.role}，${m.op === '<=' ? '不高于' : '不低于'} ${m.threshold}${m.unit || ''}`;
+      const key = t.dataset.mf, beforeVal = m[key], before = desc();
+      m[key] = key === 'threshold' ? (t.value === '' ? '' : Number(t.value)) : t.value;
+      logEdit(p, 3, `metric:${m.id}`, `修改指标「${m.name || '未命名'}」`, before, desc());
+      // 只改显示名称不影响判定口径，依赖关系表里不升标准修订
+      const r = commit(p, { type: 'metric', stage: 3, key, before: beforeVal, after: m[key] }, key === 'name' ? '修改了指标名称' : '修改了验收标准');
+      if (r.versions.length || r.revoked.length) renderStage(p);
+    } else if (t.dataset.result) {
+      const f = p.stages[n].fields, rk = t.dataset.result;
+      f[rk] = f[rk] || {};
+      const metaKey = n === 7 ? 'evalMeta' : 'grayMeta';
+      if (!f[metaKey] || !Engine.hasValues(f[rk])) Engine.stampResults(p, n); // 第一次录入时记下所依据的修订
+      const before = f[rk][t.dataset.mid];
+      f[rk][t.dataset.mid] = t.value === '' ? '' : Number(t.value);
+      const m = p.stages[3].fields.metrics.find(m => m.id === t.dataset.mid);
+      const ok = Rules.meets(m, t.value), prob = Rules.actualProblem(m, t.value);
+      logEdit(p, n, `result:${m.id}`, `录入${m.name}（${prob && prob !== 'empty' ? '无效' : ok === null ? '未填' : ok ? '达标' : '未达标'}）`, before === undefined ? '' : before, t.value);
+      const r = commit(p, { type: 'result', stage: n, key: m.id, before, after: f[rk][t.dataset.mid] }, `修改了${m.name}的录入值`);
+      const flag = t.closest('.r-row').querySelector('.r-flag');
+      flag.className = `r-flag ${prob && prob !== 'empty' ? 'stop' : ok === null ? '' : ok ? 'go' : 'stop'}`;
+      flag.textContent = prob && prob !== 'empty' ? '格式无效' : ok === null ? '未填' : ok ? '达标' : '未达标';
+      if (r.versions.length || r.revoked.length) renderStage(p);
+      else { const tr = $('#trend' + n); if (tr) { const ms = (p.stages[3].fields.metrics || []).filter(x => x.role === (n === 7 ? '评测' : '护栏')); tr.outerHTML = trendCards(p, n, ms, f[rk], false); } }
+    } else return;
+    Store.save(); renderTrack(p); renderDesk(p);
+  });
+
+  document.addEventListener('submit', e => {
+    if (e.target.dataset.form === 'note') {
+      e.preventDefault();
+      const text = e.target.elements.note.value.trim();
+      if (!text) return;
+      const p = Store.active();
+      Store.log(p, { stage: p.currentStage, stageName: '手动记录', type: 'note', decision: text, reason: '', rule: '', ai: '' });
+      Store.save(); openLog(ui.logFilter); toast('已记录'); return;
+    }
+    if (e.target.dataset.form !== 'addStep') return;
+    e.preventDefault();
+    const title = e.target.elements.title.value.trim();
+    if (!title) return;
+    ask('添加步骤', `在第 ${ui.viewStage} 阶段添加「${title}」。调整步骤需要写明原因。`, { ok: '添加' }).then(r => {
+      if (!r) return;
+      const p = Store.active();
+      p.stages[ui.viewStage].steps.push(Store.makeStep(title));
+      Store.log(p, { stage: ui.viewStage, stageName: stageByN(ui.viewStage).name, type: 'adjust', decision: `添加步骤：${title}`, reason: r.text, rule: '', ai: '' });
+      commit(p, { type: 'step', stage: ui.viewStage, key: 'add' }, `新增了第 ${ui.viewStage} 阶段的步骤`);
+      Store.save(); renderStage(p); renderTrack(p); renderDesk(p);
+    });
+  });
+
+  // ---------- 启动 ----------
+  (async function boot() {
+    Store.onError = msg => toast(msg);
+    Store.load();
+    await AI.init();
+    render();
+  })();
+})();
+
+
+  </script>
+</body>
+</html>

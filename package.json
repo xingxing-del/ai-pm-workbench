@@ -1,0 +1,9 @@
+{
+  "name": "ai-pm-workbench",
+  "version": "1.0.0",
+  "description": "给 AI 产品经理用的项目推进工作台：规则检查 + AI 建议 + 人拍板 + 决策留痕",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "license": "MIT"
+}
